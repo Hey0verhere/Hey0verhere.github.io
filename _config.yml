@@ -1,5 +1,1 @@
-analytics:
-  plausible:
-    enabled: true
-    site_fqdn: 'lightspeed.tajacks.com'
-    script_source: 'https://plausible.io/js/script.js'
+theme : jekyll-theme-hacker
