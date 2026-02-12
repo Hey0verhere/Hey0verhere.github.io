@@ -4,6 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nikitas</title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background-color: #0d1117;
+        color: #79c0ff;
+        font-family: 'Courier New', monospace;
+        line-height: 1.6;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        color: #79c0ff;
+        border-bottom: 1px solid #30363d;
+        padding-bottom: 10px;
+        margin: 20px 0 10px 0;
+    }
+
+    a {
+        color: #58a6ff;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+        color: #79c0ff;
+    }
+
+    #color {
+        position: absolute;
+        border-radius: 50px;
+        padding: 10px 25px;
+        left: 1578px;
+        top: 230px;
+        color: #0d1117;
+        border: 1px solid #79c0ff;
+        cursor: pointer;
+        background-color: #79c0ff;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+    }
+
+    #color:hover {
+        background-color: #58a6ff;
+    }
+
+    .container {
+        display: flex;
+        gap: 20px;
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .main-content {
+        flex: 3;
+        padding: 20px;
+        background-color: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 6px;
+    }
+
+    .sidebar {
+        flex: 1;
+        background-color: #161b22;
+        padding: 20px;
+        border-radius: 6px;
+        border: 1px solid #30363d;
+        height: fit-content;
+    }
+
+    .sidebar nav ul {
+        list-style: none;
+    }
+
+    .sidebar nav li {
+        margin: 10px 0;
+        padding: 5px 0;
+    }
+
+    .sidebar a {
+        color: #58a6ff;
+        padding: 5px 10px;
+        display: block;
+    }
+
+    .sidebar a:hover {
+        background-color: #21262d;
+        border-radius: 4px;
+    }
+
+    p {
+        margin: 10px 0;
+        color: #8b949e;
+    }
+
+    #who {
+        font-size: 1.2em;
+        color: #79c0ff;
+    }
+</style>
+
 </head>
 <body>
     <p id="who">Hi welcome.</p>
