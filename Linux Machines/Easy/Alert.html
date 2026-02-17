@@ -129,18 +129,18 @@ I tried to connect there but I needed credentials. Back to our http server.
 <br>
 I can see that there is a upload file directory, where I can upload only ".md" files.<br>
 <br>
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185001.png" alt="Screenshot">
+<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185001.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185001.png">
 <br>
 I found also that at "About us" tab we get a message.<br>
 <br>
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190321.png" alt="Screenshot">
+<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190321.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190321.png">
 <br>
 The administrator checks the contact messages at "Contact us".
 <br>
 
 So step by step we check our tabs.<br>
 First we will check the uploading tab "Markdown Viewer". I sent a ".md" file which I created and I can see that this was a little weird, because after I got redirected the contents of the file was displayed.
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190634.png" alt="Screenshot">
+<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190634.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190634.png">
 <br><br>
 Like this I understood that this was a "XSS" vulnerability.
 <br>
@@ -193,16 +193,16 @@ http://alert.htb/visualizer.php
 </div>
 <br>
 If we click "CTRL+U" to check the source-code we can see that the file was saved with a different name.<br> 
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185209.png" alt="Screenshot"><br>
+<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185209.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185209.png"><br>
 
 I started enumerating for more directories and I found out about "messages.php"<br>
 Once I search for this ".php" file I can see that it is blank. But maybe for the administrator it is not.<br>
 So I found a script and I uploaded it, to check the contents of "messages.php" as administrator.
 <br>
 I found out that there is a vulnerability at "contact us" page, where I could write a message and I would get a response to my listening server.<br>
-<img src="/pngs/HTB/Easy/Alert/Pngs/Pasted%20image%2020250523190044.png" alt="Screenshot"><br> 
+<img src="e/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190044.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190044.png"><br> 
 <br>Here is the listener:<br>
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190108.png" alt="Screenshot"><br>
+<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190108.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190108.png"><br>
 
 Combining all the above I upload the script discussed as "payload.md", open a listener and copy-paste the link that I found at source code. 
 <br><br>
@@ -210,7 +210,7 @@ Combining all the above I upload the script discussed as "payload.md", open a li
 <br>
 The admin will check the link and this will trigger the file which will send me the content of "messages.php" from the view of admin. 
 <br>
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523191831.png" alt="Screenshot">
+<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523191831.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523191831.png">
 <br>
 Then I decrypt the Base64 encrypted message.<br>
 <div class="terminal-box">
@@ -300,7 +300,7 @@ fetch('http://alert.htb/messages.php?file=../../../etc/hostname')
 Where I found that there is a default configuration file for apache.<br>
 "/etc/apache2/sites-enabled/000-default.conf"<br>
 There we can find some useful info.<br>
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523195535.png" alt="Screenshot"><br>
+<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523195535.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523195535.png"><br>
 If we read this file with the same way we can see the password for a user.<br><br>
 <div class="terminal-box">
 sudo python3 script.py /var/www/statistics.alert.htb/.htpasswd
@@ -380,7 +380,7 @@ To pop a root shell now we have to use this command :<br><br>
 /tmp/damn -p
 </div><br>
 
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250525213818.png" alt="Screenshot"><br>
+<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250525213818.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250525213818.png"><br>
 
 Like this we move to root directory and read the flag.
 <br>
