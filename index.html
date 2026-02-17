@@ -81,22 +81,27 @@
         border: 1px solid #30363d;
         height: fit-content;
     }
-
+    
     .sidebar nav ul {
         list-style: none;
+        display: flex;       /* Aligns items horizontally */
+        gap: 15px;           /* Adds space between the links */
+        margin: 0;           /* Clears default browser margins */
+        padding: 0;          /* Clears default browser padding */
     }
-
+    
     .sidebar nav li {
-        margin: 10px 0;
-        padding: 5px 0;
+        margin: 0;           /* Removed the vertical margins */
+        padding: 0;          
     }
-
+    
     .sidebar a {
         color: #58a6ff;
-        padding: 5px 10px;
+        padding: 8px 16px;   /* Adjusted padding for a button-like feel */
         display: block;
+        text-decoration: none; /* Removes the underline from links */
     }
-
+    
     .sidebar a:hover {
         background-color: #21262d;
         border-radius: 4px;
@@ -117,16 +122,14 @@
 <body>
     <p id="who">Welcome to my web-page. Let's hope I can help you somehow.</p>
     <button type="button" id="color" onclick="randomColorAndPosition()">X</button>
-
-        <aside class="sidebar">
-          <nav>
-            <ul>
-              <li><a href="./machines.html" >Write Ups</a></li>
-             <br>
-              <li><a href="#" id="btn-personal" >Personal</a></li>
-            </ul>
-          </nav>
-        </aside>
+            <aside class="sidebar">
+              <nav>
+                <ul>
+                  <li><a href="./machines.html">Write Ups</a></li>
+                  <li><a href="#" id="btn-personal">Personal</a></li>
+                </ul>
+              </nav>
+            </aside>
     
 
       
