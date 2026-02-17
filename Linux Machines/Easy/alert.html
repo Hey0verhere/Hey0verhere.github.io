@@ -17,6 +17,12 @@
           margin-bottom: 10px; /* Adds space between boxes */
         }
 
+        .container {
+  max-width: 800px;  /* This stops your text from stretching too wide on big screens */
+  margin: 0 auto;    /* The 'auto' is the secret sauce that centers the box */
+  padding: 20px;     /* Adds a little breathing room inside the box */
+}
+        
     * {
         margin: 0;
         padding: 0;
@@ -128,7 +134,7 @@
 
 <a href="/index.html">Home</a>
 <br><br>
-
+<div class="container">
 I started with port enumeration.<br><br>
 
 <div class="terminal-box">
@@ -437,7 +443,7 @@ Like this we move to root directory and read the flag.
     65383dc809d3cec5c567740343688722
 </fieldset>
 <br>
-
+</div>
     
 </body>
 </html>
