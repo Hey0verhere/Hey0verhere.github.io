@@ -18,9 +18,11 @@
         }
 
         .container {
-  max-width: 800px;  /* This stops your text from stretching too wide on big screens */
-  margin: 0 auto;    /* The 'auto' is the secret sauce that centers the box */
-  padding: 20px;     /* Adds a little breathing room inside the box */
+  max-width: 700px;    /* Limits how wide the text can get */
+  margin-left: auto;   /* Pushes from the left */
+  margin-right: auto;  /* Pushes from the right */
+  display: block;      /* Ensures it behaves like a solid block */
+  text-align: left;    /* Keeps the text readable (aligned left) inside the center box */
 }
         
     * {
