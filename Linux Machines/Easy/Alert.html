@@ -33,21 +33,24 @@
 
         /* This is your main centered box */
         .container {
-            display: flex; 
-            justify-content: center; /* Keeps the pair centered */
+        display: flex; 
+            justify-content: center;
             align-items: flex-start; 
-            gap: 20px;      / Small gap between the box and the links / 
-            margin: 0 auto;          / Centers the whole group on the page /
-            padding: 20px;2
+            gap: 30px; /* Increased gap between main box and sidebar */
+            margin: 0 auto; 
+            padding: 20px 40px; /* Adds 40px padding to left and right */
+            max-width: 1200px; /* Prevents the whole layout from becoming too wide */
+            width: 100%;
         }
 
         .main-content {
-            background-color: #0d1117;
+        background-color: #0d1117;
             border: 1px solid #30363d;
             border-radius: 6px;
             padding: 30px;
-            flex-shrink: 0; / Prevents the sidebar from squishing this box / 
-            width: 800px;
+            /* Removed flex-shrink: 0 to allow responsiveness */
+            max-width: 700px; /* Reduced from 800px as requested */
+            width: 100%;
 
             
         }
@@ -87,8 +90,9 @@
             }
         
         .sidebar {
-          flex: 1;
-          position: sticky; 
+        flex: 0 1 250px; /* Grow: 0, Shrink: 1, Ideal width: 250px */
+            position: sticky;
+            top: 20px;
         }       
         
     </style>
