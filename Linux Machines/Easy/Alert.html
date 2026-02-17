@@ -34,7 +34,11 @@
         /* This is your main centered box */
         .container {
             width: 100%;
-            max-width: 800px; /* Adjust this to make the "vlog box" wider or thinner */
+            max-width: 1000px; /* Adjust this to make the "vlog box" wider or thinner */
+            display: flex;
+            flex-direction: row; / This ensures they sit side-by-side /
+            align-items: flex-start; / CRITICAL for the sticky effect to work /
+            gap: 30px;
             margin: 0 auto;
         }
 
@@ -82,7 +86,12 @@
         
         .sidebar {
           flex: 1;
+          width: 200px;
+          flex-shrink: 0;
+          position: sticky; / You can also put sticky here instead of sticky-element /
+          top: 20px;
         }
+        
     </style>
 </head>
 <body>
