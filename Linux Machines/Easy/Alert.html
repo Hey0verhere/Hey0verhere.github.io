@@ -33,14 +33,12 @@
 
         /* This is your main centered box */
         .container {
-            width: 100%;
-            max-width: 800px; /* Adjust this to make the "vlog box" wider or thinner */
-            display: flex;
-            flex-direction: row; / This ensures they sit side-by-side /
-            align-items: flex-start; / CRITICAL for the sticky effect to work /
-            gap: 40px;
-            margin: 0 auto;
-            justify-content: center; /* This keeps both boxes centered on the screen */
+            display: flex; 
+            justify-content: center; /* Keeps the pair centered */
+            align-items: flex-start; 
+            gap: 20px;      / Small gap between the box and the links / 
+            width: fit-content;      / Important: prevents the container from being 100% wide /
+            margin: 0 auto;          / Centers the whole group on the page /
         }
 
         .main-content {
@@ -50,6 +48,7 @@
             padding: 30px;
             margin-top: 20px;
             flex-shrink: 0; / Prevents the sidebar from squishing this box / 
+            width: 800px;
         }
 
         .terminal-box {
