@@ -53,13 +53,14 @@
         background-color: #58a6ff;
     }
 
+
     .container {
-        display: flex;
-        gap: 20px;
-        padding: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
+          max-width: 700px;    /* Limits how wide the text can get */
+          margin-left: auto;   /* Pushes from the left */
+          margin-right: auto;  /* Pushes from the right */
+          display: block;      /* Ensures it behaves like a solid block */
+          text-align: left;    /* Keeps the text readable (aligned left) inside the center box */
+        }
 
     .main-content {
         flex: 3;
@@ -88,9 +89,12 @@
     }
 
     .sidebar a {
-        color: #58a6ff;
-        padding: 5px 10px;
-        display: block;
+        flex: 1;
+        background-color: #161b22;
+        padding: 20px;
+        border-radius: 6px;
+        border: 1px solid #30363d;
+        height: fit-content;
     }
 
     .sidebar a:hover {
@@ -110,7 +114,7 @@
 </style>
 </head>
 <body>
-    <h1>Welcome to my personal Write Ups</h1>
+    <h1>Write Ups</h1>
     <style> 
         .hidden {
       display: none;
