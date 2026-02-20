@@ -74,12 +74,14 @@
     }
 
     .sidebar {
-        flex: 1;
+        flex: 0 0 auto;
         background-color: #161b22;
         padding: 20px;
         border-radius: 6px;
         border: 1px solid #30363d;
         height: fit-content;
+       	white-space: nowrap;
+
     }
     
     .sidebar nav ul {
@@ -116,26 +118,33 @@
         font-size: 1.2em;
         color: #79c0ff;
     }
+     nav {
+      display: flex;       /* This aligns children in a row */
+      gap: 20px;           /* Adds space between the items */
+      align-items: center; /* Vertically centers them if they have different heights */
+    }
+
 </style>
 
 </head>
 <body>
     <p id="who">Welcome to my web-page. Let's hope I can help you somehow.</p>
     <button type="button" id="color" onclick="randomColorAndPosition()">X</button>
-            <aside class="sidebar">
-              <nav>
-                <ul>
-                  <li><a href="./machines.html">Write Ups</a></li>
-                  <li><a href="#" id="btn-personal">Personal</a></li>
-                </ul>
-              </nav>
-            </aside>
+        <nav>        
+        <aside class="sidebar">
+    		  <a href="./machines.html">Write Ups</a>
+    	    </aside>
+    	 <aside class="sidebar">
+    	
+    		<a href="#" id="btn-personal">Personal</a>
+    	 </aside>
+    	 </nav>
+
     
 
       
       <div class="container">
         <div class="main-content">
-          <br><br>
           <h3>Penetration Testing</h3>
        <p>
         I am and I always will be someone with curious mind.<br>
