@@ -155,32 +155,40 @@
             font-size: 1.4em; 
         }
         .terminal-wrapper { 
-            position: relative; 
             margin: 20px 0; 
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden; /* Keeps the corners rounded */
         }
+
+        .terminal-header {
+            background-color: #161b22;
+            display: flex;
+            justify-content: flex-end; /* Pushes button to the right */
+            padding: 5px 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
         .terminal-box { 
             background-color: #000;
-            color: #39ff14; padding: 15px;
-            padding-right: 65px; 
-            border-radius: 6px; border: 1px solid #30363d; 
+            color: #39ff14; 
+            padding: 15px;
             font-size: 0.9em; 
+            font-family: 'Courier New', monospace;
             
             white-space: pre-wrap;      /* Preserves formatting but wraps lines */
             word-break: break-all;      /* Forces break if a string is too long (like your Python shell) */
             overflow-wrap: break-word;  /* Extra insurance for layout stability */
         }
         .copy-btn { 
-            position: absolute;
-            top: 10px;
-            right: 10px;
             background: rgba(121, 192, 255, 0.1);
             border: 1px solid #30363d;
             color: #79c0ff;
-            padding: 5px 10px;
+            padding: 4px 12px;
             font-size: 11px;
             border-radius: 4px;
             cursor: pointer; 
-            transition: 0.2s; 
+            transition: 0.2s;
         }
         .copy-btn:hover { 
             background: var(--accent);
@@ -393,28 +401,38 @@
                 // 4. Inject the body of the fetched file
                 display.innerHTML = doc.body.innerHTML;
 
-                // 5. Setup Copy Buttons for terminal boxes
+
+                // 5. Setup Terminal UI (Header + Box + Button)
                 display.querySelectorAll('.terminal-box').forEach((box) => {
-                    // Prevent duplicate wrappers if already wrapped
-                    if (box.parentElement.className === 'terminal-wrapper') return;
-
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'terminal-wrapper';
-                    box.parentNode.insertBefore(wrapper, box);
-                    wrapper.appendChild(box);
-
-                    const btn = document.createElement('button');
-                    btn.className = 'copy-btn';
-                    btn.innerText = 'Copy';
-                    btn.onclick = function() {
-                        navigator.clipboard.writeText(box.innerText).then(() => {
-                            btn.innerText = 'Copied!';
-                            setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
-                        });
-                    };
-                    wrapper.appendChild(btn);
-                });
-
+                if (box.parentElement.className === 'terminal-wrapper') return;
+            
+                // Create the outer wrapper
+                const wrapper = document.createElement('div');
+                wrapper.className = 'terminal-wrapper';
+                
+                // Create the header bar
+                const header = document.createElement('div');
+                header.className = 'terminal-header';
+            
+                // Create the button
+                const btn = document.createElement('button');
+                btn.className = 'copy-btn';
+                btn.innerText = 'Copy';
+            
+                // Move elements into place
+                box.parentNode.insertBefore(wrapper, box);
+                wrapper.appendChild(header);
+                header.appendChild(btn);
+                wrapper.appendChild(box);
+            
+                btn.onclick = function() {
+                    navigator.clipboard.writeText(box.innerText).then(() => {
+                        btn.innerText = 'Copied!';
+                        setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
+                    });
+                };
+            });
+                
             } catch (err) {
                 console.error(err);
                 display.innerHTML = `<p style="color: #ff5f56;">Error: ${err.message}</p>`;
