@@ -155,18 +155,15 @@
             font-size: 1.4em; 
         }
         .terminal-wrapper { 
-            margin: 20px 0; 
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            overflow: hidden; /* Keeps the corners rounded */
+            margin: 20px 0;
+            border: none; /* Removed the outer border */
         }
 
         .terminal-header {
-            background-color: #161b22;
+            background-color: transparent; /* Makes it blend in */
             display: flex;
-            justify-content: flex-end; /* Pushes button to the right */
-            padding: 5px 10px;
-            border-bottom: 1px solid var(--border-color);
+            justify-content: flex-end;
+            padding: 5px 0; /* Space for the button */
         }
         
         .terminal-box { 
