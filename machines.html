@@ -226,6 +226,50 @@
             padding-left: 10px;
         }
 
+            /* 1. Fix the body for mobile */
+    @media (max-width: 768px) {
+        body {
+            flex-direction: column; /* Stack sidebar on top of content */
+        }
+    
+        /* 2. Make sidebar full width and auto-height */
+        .sidebar {
+            width: 100%;
+            height: auto;
+            position: relative; /* Remove sticky on mobile for better scrolling */
+            border-right: none;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+        }
+    
+        /* 3. Adjust main content padding */
+        .main-content {
+            padding: 15px;
+        }
+    
+        .content-card {
+            padding: 20px;
+            border: none; /* Remove borders on mobile to save space */
+        }
+    
+        /* 4. Make terminal boxes easier to read on small screens */
+        .terminal-box {
+            font-size: 0.8rem;
+            padding-right: 15px; /* Adjusting for the copy button */
+        }
+    
+        /* 5. Scale images for mobile */
+        .welcome-banner {
+            margin: 20px auto;
+        }
+    }
+    
+    /* Ensure images never overflow the screen */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
     </style>
 </head>
 <body>
