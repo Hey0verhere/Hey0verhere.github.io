@@ -130,7 +130,18 @@
             color: #c9d1d9;
         }
 
-        .hidden { display: none; }
+        .hidden { display: none !important; }
+
+        .welcome-banner {
+            display: block;       /* Forces it onto its own line */
+            margin: 40px auto;    /* 40px space top/bottom, auto centers horizontally */
+            width: 80%;           /* Makes it larger and more prominent */
+            max-width: 600px;     /* Prevents it from getting too huge on big screens */
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Optional: adds some depth */
+        }
+
         
         /* Spawning Writeup Styles */
         .step-header { 
@@ -210,10 +221,10 @@
                     If you have any comment or question feel free to contact me.
                 </p>
         
-                <img id="welcome-image" src="/pngs/loading.jpeg" alt="loading Banner" 
-                     style="display: block; margin: 20px auto; width: 300px; border-radius: 8px; border: 1px solid var(--border-color);">
-        
                 <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border-color);">
+
+                <img id="welcome-image" src="/pngs/loading.png" alt="loading Banner" 
+                style="display: block; margin: 20px auto; width: 300px; border-radius: 8px; border: 1px solid var(--border-color);">
                 
                 <div id="dynamic-content"></div>
             </div>
