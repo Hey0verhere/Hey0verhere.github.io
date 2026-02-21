@@ -107,7 +107,57 @@
         .error { color: #f85149; }
 
         .hidden { display: none; }
-    </style>
+        
+                /* Styling for the spawned writeups */
+        .step-header {
+            color: #ff7b72;
+            border-bottom: 1px solid #30363d;
+            margin: 40px 0 20px 0;
+            padding-bottom: 5px;
+            font-size: 1.4em;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .terminal-wrapper {
+            position: relative;
+            margin: 20px 0;
+        }
+        
+        .terminal-box {
+            background-color: #000000;
+            color: #39ff14;
+            padding: 15px;
+            padding-right: 65px; 
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            font-size: 0.9em;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(121, 192, 255, 0.1);
+            border: 1px solid #30363d;
+            color: #79c0ff;
+            padding: 5px 10px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .cred-box { border: 1px solid #3fb950; padding: 15px; border-radius: 6px; margin: 20px 0; background: rgba(63, 185, 80, 0.05); }
+        .cred-box legend { color: #3fb950; font-weight: bold; padding: 0 10px; }
+        
+        .root-box { border: 1px solid #f85149; padding: 15px; border-radius: 6px; margin: 20px 0; background: rgba(248, 81, 73, 0.05); }
+        .root-box legend { color: #f85149; font-weight: bold; padding: 0 10px; }
+        
+        .writeup-content ul { margin-left: 25px; margin-bottom: 15px; }
+        .writeup-content li { margin-bottom: 8px; color: #8b949e; }
+            </style>
 </head>
 <body>
 
@@ -152,37 +202,52 @@
         }
 
         // The AJAX "Spawn" Logic
-        async function loadMachine(url, name) {
-            const display = document.getElementById('dynamic-content');
-            const title = document.getElementById('machine-title');
-            const defaultText = document.getElementById('default-text');
+async function loadMachine(element, url, name) {
+    const display = document.getElementById('dynamic-content');
+    const title = document.getElementById('machine-title');
+    const defaultText = document.getElementById('default-text');
 
-            title.innerText = "Loading " + name + "...";
-            display.innerHTML = '<p class="loading">Fetching data from terminal...</p>';
+    // UI Updates
+    document.querySelectorAll('.machine-link').forEach(link => link.classList.remove('active'));
+    element.classList.add('active');
+    title.innerText = `[#] ${name}`;
+    defaultText.classList.add('hidden');
+    display.innerHTML = '<p class="loading-text">Executing fetch command...</p>';
 
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Machine write-up not found.');
-                
-                const html = await response.text();
-                
-                // Success! Update the UI
-                title.innerText = name;
-                defaultText.style.display = 'none'; // Hide the intro text
-                
-                // We extract only what's inside the <body> of the fetched file 
-                // to avoid double <html> tags
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const newContent = doc.body.innerHTML;
-                
-                display.innerHTML = newContent;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('File not found');
+        const html = await response.text();
+        
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Inject the content
+        display.innerHTML = doc.body.innerHTML;
 
-            } catch (err) {
-                title.innerText = "Error";
-                display.innerHTML = `<p class="error">404: ${err.message}</p>`;
-            }
-        }
+        // NEW: Automatically add Copy buttons to all terminal boxes found in the injected HTML
+        display.querySelectorAll('.terminal-box').forEach((box) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'terminal-wrapper';
+            box.parentNode.insertBefore(wrapper, box);
+            wrapper.appendChild(box);
+
+            const btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.innerText = 'Copy';
+            btn.addEventListener('click', () => {
+                navigator.clipboard.writeText(box.innerText).then(() => {
+                    btn.innerText = 'Copied!';
+                    setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
+                });
+            });
+            wrapper.appendChild(btn);
+        });
+
+    } catch (err) {
+        display.innerHTML = `<p style="color: #ff5f56;">Error: Could not retrieve ${name}.</p>`;
+    }
+}
     </script>
 </body>
 </html>
