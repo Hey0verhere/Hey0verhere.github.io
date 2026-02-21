@@ -133,16 +133,51 @@
         .hidden { display: none; }
         
         /* Spawning Writeup Styles */
-        .step-header { color: #ff7b72; border-bottom: 1px solid #30363d; margin: 40px 0 20px 0; padding-bottom: 5px; font-size: 1.4em; }
-        .terminal-wrapper { position: relative; margin: 20px 0; }
-        .terminal-box { background-color: #000; color: #39ff14; padding: 15px; padding-right: 65px; border-radius: 6px; border: 1px solid #30363d; font-size: 0.9em; white-space: pre-wrap; }
-        .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(121, 192, 255, 0.1); border: 1px solid #30363d; color: #79c0ff; padding: 5px 10px; font-size: 11px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
-        .copy-btn:hover { background: var(--accent); color: var(--bg-main); }
-        .loading-text { color: var(--accent); font-style: italic; }
+        .step-header { 
+            color: #ff7b72; 
+            border-bottom: 1px solid #30363d;
+            margin: 40px 0 20px 0;
+            padding-bottom: 5px; 
+            font-size: 1.4em; 
+        }
+        .terminal-wrapper { 
+            position: relative; 
+            margin: 20px 0; 
+        }
+        .terminal-box { 
+            background-color: #000;
+            color: #39ff14; padding: 15px;
+            padding-right: 65px; 
+            border-radius: 6px; border: 1px solid #30363d; 
+            font-size: 0.9em; 
+            
+            white-space: pre-wrap;      /* Preserves formatting but wraps lines */
+            word-break: break-all;      /* Forces break if a string is too long (like your Python shell) */
+            overflow-wrap: break-word;  /* Extra insurance for layout stability */
+        }
+        .copy-btn { 
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(121, 192, 255, 0.1);
+            border: 1px solid #30363d;
+            color: #79c0ff;
+            padding: 5px 10px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer; 
+            transition: 0.2s; 
+        }
+        .copy-btn:hover { 
+            background: var(--accent);
+            color: var(--bg-main);
+        }
+        .loading-text { 
+            color: var(--accent); 
+            font-style: italic; 
+        }
 
-        white-space: pre-wrap;      /* Preserves formatting but wraps lines */
-        word-break: break-all;      /* Forces break if a string is too long (like your Python shell) */
-        overflow-wrap: break-word;  /* Extra insurance for layout stability */
+
     </style>
 </head>
 <body>
