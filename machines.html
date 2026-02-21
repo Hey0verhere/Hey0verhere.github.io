@@ -139,6 +139,10 @@
         .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(121, 192, 255, 0.1); border: 1px solid #30363d; color: #79c0ff; padding: 5px 10px; font-size: 11px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
         .copy-btn:hover { background: var(--accent); color: var(--bg-main); }
         .loading-text { color: var(--accent); font-style: italic; }
+
+        white-space: pre-wrap;      /* Preserves formatting but wraps lines */
+        word-break: break-all;      /* Forces break if a string is too long (like your Python shell) */
+        overflow-wrap: break-word;  /* Extra insurance for layout stability */
     </style>
 </head>
 <body>
