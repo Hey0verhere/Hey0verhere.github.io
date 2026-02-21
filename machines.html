@@ -49,16 +49,20 @@
         .nav-item { margin-bottom: 0.5rem; }
 
         .category-btn {
-            width: 100%;
-            background: none;
-            border: none;
-            color: var(--text-primary);
+            width: 100%;              /* Ensures it spans the sidebar */
+            background: none;         /* Ensures no default grey background on buttons */
+            border: none;             /* Removes default button borders */
+            color: var(--text-primary);     /* Keeps your blue/theme color */
             text-align: left;
             padding: 10px;
             font-size: 1.1rem;
             font-weight: bold;
-            cursor: pointer;
+            cursor: pointer;         /* Ensures the "hand" icon appears on both */
             transition: 0.2s;
+            display: block;          /* Forces the <a> to take up the full width like a button */
+            text-decoration: none;   /* Removes the default underline from the link */
+            appearance: none;        /* Removes default browser button styling */
+            font-family: inherit;    /* Ensures font matches the rest of the site */
         }
 
         .category-btn:hover { color: var(--accent); }
