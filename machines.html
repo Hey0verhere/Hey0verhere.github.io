@@ -428,14 +428,14 @@
                 
                 // Create the header bar
                 const header = document.createElement('div');
-                header.style = "background:#161b22; display:flex; justify-content:flex-end; padding:5px; border:1px solid #30363d; border-bottom:none; border-radius:6px 6px 0 0;";
+                header.style = "display: flex; justify-content: flex-end; padding-bottom: 8px;";
                 header.className = 'terminal-header';
             
                 // Create the button
                 const btn = document.createElement('button');
                 btn.className = 'copy-btn';
                 btn.innerText = 'Copy';
-                btn.style = "position:static; padding:4px 8px;";
+                btn.style = "position:static; padding:4px 10px;";
             
                 // Move elements into place
                 box.parentNode.insertBefore(wrapper, box);
