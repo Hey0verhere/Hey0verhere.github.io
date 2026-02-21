@@ -20,7 +20,7 @@
         body {
             background-color: var(--bg-main);
             color: var(--text-primary);
-            font-family: 'Courier New', monospace; /* Kept your preferred font */
+            font-family: 'Courier New', monospace;
             display: flex;
             min-height: 100vh;
         }
@@ -79,6 +79,12 @@
             transition: 0.2s;
         }
 
+        /* Active highlight for selected machine */
+        .machine-list li a.active {
+            color: var(--success);
+            font-weight: bold;
+        }
+
         .machine-list li a:hover { color: var(--accent); padding-left: 5px; }
 
         /* Main Content */
@@ -100,64 +106,19 @@
 
         #dynamic-content {
             margin-top: 20px;
-            color: #c9d1d9; /* Standard GitHub text color for the writeup */
+            color: #c9d1d9;
         }
-
-        .loading { color: var(--accent); font-style: italic; }
-        .error { color: #f85149; }
 
         .hidden { display: none; }
         
-                /* Styling for the spawned writeups */
-        .step-header {
-            color: #ff7b72;
-            border-bottom: 1px solid #30363d;
-            margin: 40px 0 20px 0;
-            padding-bottom: 5px;
-            font-size: 1.4em;
-            font-family: 'Courier New', monospace;
-        }
-        
-        .terminal-wrapper {
-            position: relative;
-            margin: 20px 0;
-        }
-        
-        .terminal-box {
-            background-color: #000000;
-            color: #39ff14;
-            padding: 15px;
-            padding-right: 65px; 
-            border-radius: 6px;
-            border: 1px solid #30363d;
-            font-size: 0.9em;
-            font-family: 'Courier New', monospace;
-            overflow-x: auto;
-            white-space: pre-wrap;
-        }
-        
-        .copy-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(121, 192, 255, 0.1);
-            border: 1px solid #30363d;
-            color: #79c0ff;
-            padding: 5px 10px;
-            font-size: 11px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        .cred-box { border: 1px solid #3fb950; padding: 15px; border-radius: 6px; margin: 20px 0; background: rgba(63, 185, 80, 0.05); }
-        .cred-box legend { color: #3fb950; font-weight: bold; padding: 0 10px; }
-        
-        .root-box { border: 1px solid #f85149; padding: 15px; border-radius: 6px; margin: 20px 0; background: rgba(248, 81, 73, 0.05); }
-        .root-box legend { color: #f85149; font-weight: bold; padding: 0 10px; }
-        
-        .writeup-content ul { margin-left: 25px; margin-bottom: 15px; }
-        .writeup-content li { margin-bottom: 8px; color: #8b949e; }
-            </style>
+        /* Spawning Writeup Styles */
+        .step-header { color: #ff7b72; border-bottom: 1px solid #30363d; margin: 40px 0 20px 0; padding-bottom: 5px; font-size: 1.4em; }
+        .terminal-wrapper { position: relative; margin: 20px 0; }
+        .terminal-box { background-color: #000; color: #39ff14; padding: 15px; padding-right: 65px; border-radius: 6px; border: 1px solid #30363d; font-size: 0.9em; white-space: pre-wrap; }
+        .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(121, 192, 255, 0.1); border: 1px solid #30363d; color: #79c0ff; padding: 5px 10px; font-size: 11px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        .copy-btn:hover { background: var(--accent); color: var(--bg-main); }
+        .loading-text { color: var(--accent); font-style: italic; }
+    </style>
 </head>
 <body>
 
@@ -167,16 +128,16 @@
             <div class="nav-item">
                 <button class="category-btn" onclick="toggleGroup('group-Linux')">_ Linux</button>
                 <ul id="group-Linux" class="machine-list">
-                    <li><a href="#" onclick="loadMachine('./Linux Machines/Easy/Alert.html', 'Alert')">Alert</a></li>
-                    <li><a href="#" onclick="loadMachine('./Linux Machines/Easy/Beep.html', 'Beep')">Beep</a></li>
-                    <li><a href="#" onclick="loadMachine('./Linux Machines/Easy/Bashed.html', 'Bashed')">Bashed</a></li>
+                    <li><a href="#" class="machine-link" onclick="loadMachine(this, './Linux Machines/Easy/Alert.html', 'Alert')">Alert</a></li>
+                    <li><a href="#" class="machine-link" onclick="loadMachine(this, './Linux Machines/Easy/Beep.html', 'Beep')">Beep</a></li>
+                    <li><a href="#" class="machine-link" onclick="loadMachine(this, './Linux Machines/Easy/Bashed.html', 'Bashed')">Bashed</a></li>
                 </ul>
             </div>
 
             <div class="nav-item">
                 <button class="category-btn" onclick="toggleGroup('group-Windows')">_ Windows</button>
                 <ul id="group-Windows" class="machine-list hidden">
-                    <li><a href="#" onclick="loadMachine('wmachine1.html', 'WMachine1')">WMachine1</a></li>
+                    <li><a href="#" class="machine-link" onclick="loadMachine(this, 'wmachine1.html', 'WMachine1')">WMachine1</a></li>
                 </ul>
             </div>
         </nav>
@@ -188,66 +149,69 @@
             <p id="default-text" style="color: var(--text-secondary); margin-top: 10px;">
                 Welcome to the archive. Use the sidebar to navigate through different OS environments.
             </p>
-            
             <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border-color);">
-            
             <div id="dynamic-content"></div>
         </div>
     </main>
 
     <script>
-        // Toggle the dropdowns
         function toggleGroup(id) {
             document.getElementById(id).classList.toggle('hidden');
         }
 
-        // The AJAX "Spawn" Logic
-async function loadMachine(element, url, name) {
-    const display = document.getElementById('dynamic-content');
-    const title = document.getElementById('machine-title');
-    const defaultText = document.getElementById('default-text');
+        async function loadMachine(element, url, name) {
+            const display = document.getElementById('dynamic-content');
+            const title = document.getElementById('machine-title');
+            const defaultText = document.getElementById('default-text');
 
-    // UI Updates
-    document.querySelectorAll('.machine-link').forEach(link => link.classList.remove('active'));
-    element.classList.add('active');
-    title.innerText = `[#] ${name}`;
-    defaultText.classList.add('hidden');
-    display.innerHTML = '<p class="loading-text">Executing fetch command...</p>';
+            // 1. Manage active link styling
+            document.querySelectorAll('.machine-link').forEach(link => link.classList.remove('active'));
+            if(element) element.classList.add('active');
 
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('File not found');
-        const html = await response.text();
-        
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        
-        // Inject the content
-        display.innerHTML = doc.body.innerHTML;
+            // 2. Set UI to loading state
+            title.innerText = `[#] ${name}`;
+            defaultText.classList.add('hidden');
+            display.innerHTML = '<p class="loading-text">Executing fetch command...</p>';
 
-        // NEW: Automatically add Copy buttons to all terminal boxes found in the injected HTML
-        display.querySelectorAll('.terminal-box').forEach((box) => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'terminal-wrapper';
-            box.parentNode.insertBefore(wrapper, box);
-            wrapper.appendChild(box);
+            try {
+                // 3. Fetch the content
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Could not find ${url}`);
+                const html = await response.text();
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // 4. Inject the body of the fetched file
+                display.innerHTML = doc.body.innerHTML;
 
-            const btn = document.createElement('button');
-            btn.className = 'copy-btn';
-            btn.innerText = 'Copy';
-            btn.addEventListener('click', () => {
-                navigator.clipboard.writeText(box.innerText).then(() => {
-                    btn.innerText = 'Copied!';
-                    setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
+                // 5. Setup Copy Buttons for terminal boxes
+                display.querySelectorAll('.terminal-box').forEach((box) => {
+                    // Prevent duplicate wrappers if already wrapped
+                    if (box.parentElement.className === 'terminal-wrapper') return;
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'terminal-wrapper';
+                    box.parentNode.insertBefore(wrapper, box);
+                    wrapper.appendChild(box);
+
+                    const btn = document.createElement('button');
+                    btn.className = 'copy-btn';
+                    btn.innerText = 'Copy';
+                    btn.onclick = function() {
+                        navigator.clipboard.writeText(box.innerText).then(() => {
+                            btn.innerText = 'Copied!';
+                            setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
+                        });
+                    };
+                    wrapper.appendChild(btn);
                 });
-            });
-            wrapper.appendChild(btn);
-        });
 
-    } catch (err) {
-        display.innerHTML = `<p style="color: #ff5f56;">Error: Could not retrieve ${name}.</p>`;
-    }
-}
+            } catch (err) {
+                console.error(err);
+                display.innerHTML = `<p style="color: #ff5f56;">Error: ${err.message}</p>`;
+            }
+        }
     </script>
 </body>
 </html>
