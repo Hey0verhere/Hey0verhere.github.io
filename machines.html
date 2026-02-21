@@ -273,10 +273,30 @@
     }
     
     /* Ensure images never overflow the screen */
-    img {
-        max-width: 100%;
-        height: auto;
-    }
+        img {
+            max-width: 100%;
+            height: auto;
+    }    
+
+        #welcome-image {
+            display: block;
+            margin: 20px auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            width: 90%;
+            height: auto;
+         }
+        
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid var(--border-color); }
+            .main-content { padding: 15px; }
+            .content-card { padding: 20px; border: none; }
+        }
+        
+        @media (min-width: 769px) {
+            #welcome-image { width: 800px; height: 600px; }
+        }
 
     </style>
 </head>
@@ -357,8 +377,7 @@
                         
                 <hr id="welcome-hr" style="margin: 20px 0; border: 0; border-top: 1px solid var(--border-color);">
 
-                <img id="welcome-image" src="/pngs/loading2.png" alt="loading Banner" 
-                style="display: block; margin: 20px auto; width: 700px; height: 500px; border-radius: 8px; border: 1px solid var(--border-color);">
+               <img id="welcome-image" src="/pngs/loading2.png" alt="loading Banner">
                 
                 <div id="dynamic-content"></div>
             </div>
@@ -412,12 +431,14 @@
                 
                 // Create the header bar
                 const header = document.createElement('div');
+                header.style = "background:#161b22; display:flex; justify-content:flex-end; padding:5px; border:1px solid #30363d; border-bottom:none; border-radius:6px 6px 0 0;";
                 header.className = 'terminal-header';
             
                 // Create the button
                 const btn = document.createElement('button');
                 btn.className = 'copy-btn';
                 btn.innerText = 'Copy';
+                btn.style = "position:static; padding:4px 8px;";
             
                 // Move elements into place
                 box.parentNode.insertBefore(wrapper, box);
