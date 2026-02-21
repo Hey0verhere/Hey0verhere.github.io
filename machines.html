@@ -203,16 +203,21 @@
         </nav>
     </aside>
 
-    <main class="main-content">
-        <div class="content-card">
-            <h2 id="machine-title">Here you can find my write ups.</h2>
-            <p id="default-text" style="color: var(--text-secondary); margin-top: 10px;">
-                If you have any comment or question feel free to contact me.
-            </p>
-            <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border-color);">
-            <div id="dynamic-content"></div>
-        </div>
-    </main>
+        <main class="main-content">
+            <div class="content-card">
+                <h2 id="machine-title">Here you can find my write ups.</h2>
+                <p id="default-text" style="color: var(--text-secondary); margin-top: 10px;">
+                    If you have any comment or question feel free to contact me.
+                </p>
+        
+                <img id="welcome-image" src="/pngs/loading.jpeg" alt="loading Banner" 
+                     style="display: block; margin: 20px auto; width: 300px; border-radius: 8px; border: 1px solid var(--border-color);">
+        
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border-color);">
+                
+                <div id="dynamic-content"></div>
+            </div>
+        </main>
 
     <script>
         function toggleGroup(id) {
@@ -221,18 +226,20 @@
 
         async function loadMachine(element, url, name) {
             const display = document.getElementById('dynamic-content');
-            const title = document.getElementById('machine-title');
             const defaultText = document.getElementById('default-text');
-
-            // 1. Manage active link styling
+            const welcomeImg = document.getElementById('welcome-image'); // Get the image
+        
+            // UI Updates
             document.querySelectorAll('.machine-link').forEach(link => link.classList.remove('active'));
             if(element) element.classList.add('active');
-
-            // 2. Set UI to loading state
-            title.innerText = `[#] ${name}`;
+        
             defaultText.classList.add('hidden');
+            
+            // HIDE THE IMAGE HERE
+            if(welcomeImg) welcomeImg.classList.add('hidden'); 
+        
             display.innerHTML = '<p class="loading-text">Executing fetch command...</p>';
-
+            
             try {
                 // 3. Fetch the content
                 const response = await fetch(url);
