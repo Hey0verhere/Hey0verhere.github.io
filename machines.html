@@ -134,11 +134,12 @@
 
         .welcome-banner {
             display: block;       /* Forces it onto its own line */
-            margin: 40px auto;    /* 40px space top/bottom, auto centers horizontally */
-            width: 80%;           /* Makes it larger and more prominent */
-            max-width: 600px;     /* Prevents it from getting too huge on big screens */
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
+            display: block;
+            margin: 50px auto;    /* More space top and bottom */
+            width: 100%;          /* Fills the width of the card */
+            max-width: 750px;     /* Large, but doesn't touch the very edges of the card */
+            border-radius: 12px;  /* Slightly rounder corners for a modern look */
+            border: 2px solid var(--border-color); /* Thicker border to make it pop */
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Optional: adds some depth */
         }
 
