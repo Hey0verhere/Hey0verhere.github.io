@@ -186,7 +186,7 @@
         <h1>Write-ups 📜</h1>
         <nav class="nav-list">
             <div class="nav-item">
-                <button class="category-btn" onclick="toggleGroup('group-Linux')">_ Linux</button>
+                <button class="category-btn" onclick="toggleGroup('group-Linux')">Linux</button>
                 <ul id="group-Linux" class="machine-list">
                     <li><a href="#" class="machine-link" onclick="loadMachine(this, './Linux Machines/Easy/Alert.html', 'Alert')">Alert</a></li>
                     <li><a href="#" class="machine-link" onclick="loadMachine(this, './Linux Machines/Easy/Beep.html', 'Beep')">Beep</a></li>
@@ -195,9 +195,9 @@
             </div>
 
             <div class="nav-item">
-                <button class="category-btn" onclick="toggleGroup('group-Windows')">_ Windows</button>
+                <button class="category-btn" onclick="toggleGroup('group-Windows')">Windows</button>
                 <ul id="group-Windows" class="machine-list hidden">
-                    <li><a href="#" class="machine-link" onclick="loadMachine(this, 'wmachine1.html', 'WMachine1')">WMachine1</a></li>
+                    <li><a href="#" class="machine-link" onclick="loadMachine(this, './Windows Machines/Easy/Active.html', 'Active')">Active</a></li>
                 </ul>
             </div>
         </nav>
@@ -205,9 +205,9 @@
 
     <main class="main-content">
         <div class="content-card">
-            <h2 id="machine-title">Select a machine to view the write-up</h2>
+            <h2 id="machine-title">Here you can find my write ups.</h2>
             <p id="default-text" style="color: var(--text-secondary); margin-top: 10px;">
-                Welcome to the archive. Use the sidebar to navigate through different OS environments.
+                If you have any comment or question feel free to contact me.
             </p>
             <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border-color);">
             <div id="dynamic-content"></div>
