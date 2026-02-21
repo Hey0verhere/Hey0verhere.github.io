@@ -227,11 +227,12 @@
 <body>
 
     <aside class="sidebar">
-    <h1>Write Ups 📜</h1>
+    <a href="./machines.html" class="category-btn"><h1>Write Ups 📜</h1></a>
+
     <nav class="nav-list">
         <div class="nav-item">
             
-            <button class="category-btn" onclick="./index.html"><h3>Home</h3></button>
+           <a href="./index.html" class="category-btn"><h3>Home</h3></a>
             
             <button class="category-btn" onclick="toggleGroup('group-Linux')"><h3>Linux</h3></button>
             <ul id="group-Linux" class="machine-list hidden">
@@ -297,6 +298,8 @@
                     If you have any comment or question feel free to contact me.
                 </p>
 
+                        
+                <hr id="welcome-hr" style="margin: 20px 0; border: 0; border-top: 1px solid var(--border-color);">
 
                 <img id="welcome-image" src="/pngs/loading2.png" alt="loading Banner" 
                 style="display: block; margin: 20px auto; width: 300px; border-radius: 8px; border: 1px solid var(--border-color);">
@@ -314,12 +317,14 @@
             const display = document.getElementById('dynamic-content');
             const defaultText = document.getElementById('default-text');
             const machineTitle = document.getElementById('machine-title');
+            const welcomeLine = document.getElementById('welcome-hr');
             const welcomeImg = document.getElementById('welcome-image'); // Get the image
         
             // UI Updates
             document.querySelectorAll('.machine-link').forEach(link => link.classList.remove('active'));
             if(element) element.classList.add('active');
 
+            welcomeLine.classList.add('hidden');
             machineTitle.classList.add('hidden');
             defaultText.classList.add('hidden');
             
