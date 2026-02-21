@@ -186,32 +186,92 @@
             color: var(--accent); 
             font-style: italic; 
         }
-
+        /* Difficulty Buttons (Easy, Medium, Hard) */
+        .diff-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            text-align: left;
+            padding: 5px 10px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: 0.2s;
+        }
+        
+        .diff-btn:hover { color: #ff7b72; } /* Reddish color for difficulty headers */
+        
+        /* The machine links under difficulty */
+        .sub-machine-list {
+            list-style: none;
+            padding-left: 20px; /* Indent the machine names */
+            margin-bottom: 10px;
+            border-left: 1px dashed var(--border-color);
+            margin-left: 15px;
+        }
+        
+        .diff-item {
+            list-style: none;
+            margin-top: 5px;
+        }
+        
+        /* Ensure the machine list (Linux/Windows) doesn't have its own bullets */
+        .machine-list {
+            list-style: none;
+            padding-left: 10px;
+        }
 
     </style>
 </head>
 <body>
 
     <aside class="sidebar">
-        <h1>Write-ups 📜</h1>
-        <nav class="nav-list">
-            <div class="nav-item">
-                <button class="category-btn" onclick="toggleGroup('group-Linux')">Linux</button>
-                <ul id="group-Linux" class="machine-list">
-                    <li><a href="#" class="machine-link" onclick="loadMachine(this, './Linux Machines/Easy/Alert.html', 'Alert')">Alert</a></li>
-                    <li><a href="#" class="machine-link" onclick="loadMachine(this, './Linux Machines/Easy/Beep.html', 'Beep')">Beep</a></li>
-                    <li><a href="#" class="machine-link" onclick="loadMachine(this, './Linux Machines/Easy/Bashed.html', 'Bashed')">Bashed</a></li>
-                </ul>
-            </div>
+    <h1>Write Ups 📜</h1>
+    <nav class="nav-list">
+        <div class="nav-item">
+            <button class="category-btn" onclick="toggleGroup('group-Linux')">- Linux</button>
+            <ul id="group-Linux" class="machine-list hidden">
+                
+                <li class="diff-item">
+                    <button class="diff-btn" onclick="toggleGroup('linux-easy')">-- Easy</button>
+                    <ul id="linux-easy" class="sub-machine-list hidden">
+                        <li><a href="#" class="machine-link" onclick="loadMachine(this, './Linux Machines/Easy/Alert.html', 'Alert')">Alert</a></li>
+                        <li><a href="#" class="machine-link" onclick="loadMachine(this, './Linux Machines/Easy/Beep.html', 'Beep')">Beep</a></li>
+                        <li><a href="#" class="machine-link" onclick="loadMachine(this, './Linux Machines/Easy/Bashed.html', 'Bashed')">Bashed</a></li>
+                    </ul>
+                </li>
 
-            <div class="nav-item">
-                <button class="category-btn" onclick="toggleGroup('group-Windows')">Windows</button>
-                <ul id="group-Windows" class="machine-list hidden">
-                    <li><a href="#" class="machine-link" onclick="loadMachine(this, './Windows Machines/Easy/Active.html', 'Active')">Active</a></li>
-                </ul>
-            </div>
-        </nav>
-    </aside>
+                <li class="diff-item">
+                    <button class="diff-btn" onclick="toggleGroup('linux-medium')">-- Medium</button>
+                    <ul id="linux-medium" class="sub-machine-list hidden">
+                        <li><a href="#" class="machine-link" onclick="loadMachine(this, './Linux Machines/Medium/Cronos.html', 'Cronos')">Cronos</a></li>
+                    </ul>
+                </li>
+
+                <li class="diff-item">
+                    <button class="diff-btn" onclick="toggleGroup('linux-hard')">-- Hard</button>
+                    <ul id="linux-hard" class="sub-machine-list hidden">
+                        <li><a href="#" class="machine-link" onclick="loadMachine(this, './Linux Machines/Hard/Something.html', 'Something')">Something</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="nav-item">
+            <button class="category-btn" onclick="toggleGroup('group-Windows')">- Windows</button>
+            <ul id="group-Windows" class="machine-list hidden">
+                
+                <li class="diff-item">
+                    <button class="diff-btn" onclick="toggleGroup('win-easy')">-- Easy</button>
+                    <ul id="win-easy" class="sub-machine-list hidden">
+                        <li><a href="#" class="machine-link" onclick="loadMachine(this, './Windows Machines/Easy/Active.html', 'Active')">Active</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</aside>
 
         <main class="main-content">
             <div class="content-card">
