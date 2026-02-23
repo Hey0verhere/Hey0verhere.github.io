@@ -24,7 +24,7 @@
             </ul>
 
             <h3 class="step-header">2. Exploitation</h3>
-            <p>Navigating to port 443, I found <b>Elastix</b>. Researching the version revealed a <a href="https://www.exploit-db.com/exploits/37637">Local File Inclusion (LFI)</a> vulnerability:</p>
+            <p>Navigating to port 443, I found <b>Elastix</b>. Researching the version revealed a <a href="https://www.exploit-db.com/exploits/37637" target="_blank" rel="noopener">Local File Inclusion (LFI)</a> vulnerability:</p>
             <div class="terminal-box">https://10.10.10.7/vtigercrm/graph.php?current_language=../../../../../../../..//etc/amportal.conf%00&module=Accounts&action</div>
 
             <p>This leaked the admin credentials:</p>
