@@ -37,7 +37,7 @@
         <li><strong>-fl</strong>: Exclude responses with a specific number of lines or range of lines.</li>
     </ul>
     
-    <p>Found a <code>statistics</code> subdomain that requires authentication.So I moved back to the main page.</p>
+    <p>Found a subdomain named <code>statistics</code>  but requires authentication.So I moved back to the main page.</p>
 
     <h3 class="step-header">2. Web Exploitation (XSS to LFI)</h3>
     <p>On the main site, the "Markdown Viewer" allows uploading <code>.md</code> files.</p>
@@ -51,8 +51,8 @@
     <p>The administrator checks the contact messages at "Contact us".</p>
 
     <p> So step by step we check our tabs.
-        First we will check the uploading tab "Markdown Viewer".
-        I sent a <code>.md</code> file which I created and after I got redirected the contents of the file was displayed.</p>
+        First we will check the uploading tab "Markdown Viewer".</p>
+    <p>I sent a <code>.md</code> file which I created. Next I got redirected and the contents of the file were displayed.</p>
 
     <img src="pngs/HTB/Easy/Alert/Pasted%20image%2020250523190634.png">
 
@@ -88,11 +88,11 @@ fetch('http://alert.htb/messages.php')
     </ul>
 
 
-    <p>Before continuing I checked the "visualizer.php" file where I read the source code <code>CTRL+U</code> and found out that the file was saved with a different name.</p>
+    <p>Before continuing I checked the "visualizer.php" file.I read the source code <code>CTRL+U</code> and found out that the uploaded file was saved with a different name.</p>
 
     <img src="pngs/HTB/Easy/Alert/Pasted%20image%2020250523185209.png">
 
-    <p>I found out that at "Contact Us" there is a form that I could fill</p> 
+    <p>I found out that at "Contact Us" there was a form that I could fill</p> 
     <p>I set a listener and tried to see if there was any response.</p>
 
     <img src="pngs/HTB/Easy/Alert/Pasted%20image%2020250523190044.png">
@@ -100,15 +100,16 @@ fetch('http://alert.htb/messages.php')
     
     <img src="pngs/HTB/Easy/Alert/Pasted%20image%2020250523190108.png">
 
-    <p>Combining all the above I upload the script discussed as <code>payload.md</code>, open a listener and copy-paste the link from source code. 
+    <p>Combining all the above I uploaded the script discussed as <code>payload.md</code>, opened a listener and copy-pasted the link from source code.</p>
         <code>http://alert.htb/visualizer.php?link_share=6830997ae06754.83998933.md</code>
-    The admin will check the link and this will trigger the file which will send me the content of <code>messages.php</code> from the view of admin.</p>
+    <p>The admin will check the link and this will trigger the uploaded file and will send me the contents of <code>messages.php</code> from the view of admin.</p>
 
     <p>Decoding the data revealed a hidden file path:</p>
     <div class="terminal-box">echo "PGgxPk1lc3NhZ2VzPC9oMT4..." | base64 -d</div>
 
     <h3 class="step-header">3. Initial Access</h3>
-    <p>After I read the <code>.txt</code> file, I used the LFI vulnerability I read the default Apache configuration file and it revealed that at <code>.htpasswd</code> file has the passwords for the statistics subdomain:</p>
+    <p>After I read the <code>.txt</code> file, I used the LFI vulnerability and I read the default Apache configuration file</p>
+    <p>It was revealed that  <code>.htpasswd</code> file has credentials for the statistics subdomain:</p>
     
     <img src="pngs/HTB/Easy/Alert/Pasted%20image%2020250523195535.png">
 
@@ -120,7 +121,7 @@ fetch('http://alert.htb/messages.php')
         <legend>Credentials</legend>
         <code>albert:manchesterunited</code>
     </fieldset>
-
+<p>I connected via SSH and found the user flag.</p>
     <fieldset class="root-box">
         <legend>User Flag</legend>
         <code>5e08a222ac9809e502410937ed638862</code>
