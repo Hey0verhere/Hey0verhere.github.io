@@ -211,7 +211,7 @@ albert:manchesterunited
 We can now connect to port 22 via SSH  with these credentials and get the flag.
 
 ```user
-5e08a222ac9809e502410937ed638862
+5e08a222ac9809e502410937ed6...
 ```
 
 ---
@@ -263,5 +263,5 @@ To spawn a root shell now use the command :
 
 Like this we move to root directory and read the flag.
 ```root
-65383dc809d3cec5c567740343688722
+65383dc809d3cec5c5677403436...
 ```
