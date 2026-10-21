@@ -8,52 +8,6 @@
 </head>
 <body>
 
-    <aside class="sidebar">
-    <a href="./machines.html" class="category-btn"><h1>Write Ups 📜</h1></a>
-
-    <nav class="nav-list">
-        <div class="nav-item">
-            
-           <a href="./index.html" class="category-btn"><h3>Home</h3></a>
-            
-            <button class="category-btn" onclick="toggleGroup('group-Linux')"><h3>Linux</h3></button>
-            <ul id="group-Linux" class="machine-list hidden">
-                
-                <li class="diff-item">
-                    <button class="diff-btn" onclick="toggleGroup('linux-easy')"><h4>Easy</h4></button>
-                    <ul id="linux-easy" class="sub-machine-list hidden">
-                        <li><a href="./linux/Easy/Alert"><h5>Alert</h5></a></li>
-                        <li><a href="./linux/Easy/Beep"><h5>Beep</h5></a></li>
-                        <li><a href="./linux/Easy/Bashed"><h5>Bashed</h5></a></li>
-                        <li><a href="./linux/Easy/Orion"><h5>Orion</h5></a></li>
-                        <li><a href="./linux/Easy/Artificial"><h5>Artificial</h5></a></li>
-                        <li><a href="./linux/Easy/BoardLight"><h5>BoardLight</h5></a></li>
-                    </ul>
-                </li>
-
-                <li class="diff-item">
-                    <button class="diff-btn" onclick="toggleGroup('linux-medium')"><h4>Medium</h4></button>
-                    <ul id="linux-medium" class="sub-machine-list hidden">
-                        <li><a href="./linux/Medium/Cronos"><h5>Cronos</h5></a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-
-        <div class="nav-item">
-            <button class="category-btn" onclick="toggleGroup('group-Windows')"><h3>Windows</h3></button>
-            <ul id="group-Windows" class="machine-list hidden">
-                
-                <li class="diff-item">
-                    <button class="diff-btn" onclick="toggleGroup('win-easy')"><h4>Easy</h4></button>
-                    <ul id="win-easy" class="sub-machine-list hidden">
-                        <li><a href="./windows/Easy/Active"><h5>Active</h5></a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </nav>
-</aside>
 
         <main class="main-content">
             <div class="content-card">
@@ -71,10 +25,6 @@
             </div>
         </main>
 
-    <script>
-        function toggleGroup(id) {
-            document.getElementById(id).classList.toggle('hidden');
-        }
-    </script>
+    <script src="/nav.js"></script>
 </body>
 </html>
