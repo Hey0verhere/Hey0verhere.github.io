@@ -14,6 +14,7 @@
                         ['Orion', '/linux/Easy/Orion'],
                         ['Artificial', '/linux/Easy/Artificial'],
                         ['BoardLight', '/linux/Easy/BoardLight'],
+                        ['Cap', '/linux/Easy/Cap'],
                     ],
                 },
                 {
@@ -43,7 +44,8 @@
 
     const groupsHtml = (os) => os.groups.map((group) => {
         const id = `${os.name}-${group.name}`.toLowerCase();
-        const items = group.machines.map(([name, url]) => {
+        const sorted = [...group.machines].sort(([a], [b]) => a.localeCompare(b));
+        const items = sorted.map(([name, url]) => {
             const active = normalize(url) === current ? ' class="active"' : '';
             return `<li><a href="${url}"${active}><h5>${name}</h5></a></li>`;
         }).join('');
