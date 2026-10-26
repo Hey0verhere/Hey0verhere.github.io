@@ -9,12 +9,13 @@
                     name: 'Easy',
                     machines: [
                         ['Alert', '/linux/Easy/Alert'],
-                        ['Beep', '/linux/Easy/Beep'],
-                        ['Bashed', '/linux/Easy/Bashed'],
-                        ['Orion', '/linux/Easy/Orion'],
                         ['Artificial', '/linux/Easy/Artificial'],
+                        ['Bashed', '/linux/Easy/Bashed'],
+                        ['Beep', '/linux/Easy/Beep'],
                         ['BoardLight', '/linux/Easy/BoardLight'],
                         ['Cap', '/linux/Easy/Cap'],
+                        ['CCTV', '/linux/Easy/CCTV'],
+                        ['Orion', '/linux/Easy/Orion'],
                     ],
                 },
                 {
