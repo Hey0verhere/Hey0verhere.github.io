@@ -15,6 +15,7 @@
                         ['BoardLight', '/linux/Easy/BoardLight'],
                         ['Cap', '/linux/Easy/Cap'],
                         ['CCTV', '/linux/Easy/CCTV'],
+                        ['Chemistry', '/linux/Easy/Chemistry'],
                         ['Orion', '/linux/Easy/Orion'],
                     ],
                 },

