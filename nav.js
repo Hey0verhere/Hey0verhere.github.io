@@ -17,6 +17,7 @@
                         ['CCTV', '/linux/Easy/CCTV'],
                         ['Chemistry', '/linux/Easy/Chemistry'],
                         ['Code', '/linux/Easy/Code'],
+                        ['CodePartTwo', '/linux/Easy/CodePartTwo'],
                         ['Orion', '/linux/Easy/Orion'],
                     ],
                 },
