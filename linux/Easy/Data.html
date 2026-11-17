@@ -293,7 +293,6 @@
 <p>Tip: if you get "Secure Connection Failed", try another browser.</p>
 
 <figure>
-  <!-- missing image file: Pasted image 20260321002859.png -->
   <img src="/pngs/HTB/Easy/Data/Pasted image 20260321002859.png" alt="Grafana login page showing the server version" loading="lazy">
   <figcaption>Grafana login page showing the server version</figcaption>
 </figure>
@@ -309,7 +308,6 @@ Read file &gt; /var/lib/grafana/grafana.db</div>
 <p>There I found information about some users.</p>
 
 <figure>
-  <!-- missing image file: Pasted image 20260321003557.png -->
   <img src="/pngs/HTB/Easy/Data/Pasted image 20260321003557.png" alt="Raw grafana.db content showing user records" loading="lazy">
   <figcaption>Raw grafana.db content showing user records</figcaption>
 </figure>
@@ -418,7 +416,6 @@ root</div>
 <p>Next, I used the <code>mount</code> command to see which device I needed to mount.</p>
 
 <figure>
-  <!-- missing image file: Pasted image 20260321020259.png -->
   <img src="/pngs/HTB/Easy/Data/Pasted image 20260321020259.png" alt="Output of the mount command inside the container, showing the host devices" loading="lazy">
   <figcaption>Output of the mount command inside the container, showing the host devices</figcaption>
 </figure>
@@ -429,7 +426,6 @@ mount /dev/sda1 /tmp/pwn/
 cat /tmp/pwn/root/root.txt</div>
 
 <figure>
-  <!-- missing image file: Pasted image 20260321020219.png -->
   <img src="/pngs/HTB/Easy/Data/Pasted image 20260321020219.png" alt="Contents of root.txt read from the mounted host disk" loading="lazy">
   <figcaption>Contents of root.txt read from the mounted host disk</figcaption>
 </figure>
