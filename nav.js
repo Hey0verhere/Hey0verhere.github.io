@@ -19,6 +19,7 @@
                         ['Code', '/linux/Easy/Code'],
                         ['CodePartTwo', '/linux/Easy/CodePartTwo'],
                         ['Conversor', '/linux/Easy/Conversor'],
+                        ['Data', '/linux/Easy/Data'],
                         ['Orion', '/linux/Easy/Orion'],
                     ],
                 },
